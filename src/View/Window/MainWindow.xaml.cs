@@ -23,7 +23,7 @@ namespace WinMemoryCleaner
         public MainWindow()
         {
             // Check if application is shutting down
-            if (Application.Current != null && Application.Current.Dispatcher != null && Application.Current.Dispatcher.HasShutdownStarted)
+            if (Application.Current?.Dispatcher?.HasShutdownStarted == true)
                 return;
 
             InitializeComponent();

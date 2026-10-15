@@ -262,7 +262,7 @@ namespace WinMemoryCleaner
         /// </value>
         public bool CanAddProcessToExclusionList
         {
-            get { return SelectedProcess != null; }
+            get { return SelectedProcess is not null; }
         }
 
         /// <summary>

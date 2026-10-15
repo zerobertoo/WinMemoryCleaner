@@ -23,7 +23,7 @@ namespace WinMemoryCleaner
         /// </returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value == null ? Visibility.Collapsed : Visibility.Visible;
+            return value is null ?Visibility.Collapsed : Visibility.Visible;
         }
 
         /// <summary>
