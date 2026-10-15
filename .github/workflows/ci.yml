@@ -116,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: winmemorycleaner-${{ steps.version.outputs.app_version }}
-          path: publishWinMemoryCleaner.exe
+          path: publish/WinMemoryCleaner.exe
           if-no-files-found: error
 
       - name: Determine Test Artifact
