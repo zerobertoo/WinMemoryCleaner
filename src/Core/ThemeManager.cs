@@ -401,7 +401,7 @@ namespace WinMemoryCleaner
         /// </summary>
         public static WinFormsColor AccentColor
         {
-            get { return GetColorSafe(Helper.NameOf(() => AccentColor).Replace("Color", string.Empty), WinFormsColor.DeepSkyBlue); }
+            get { return GetColorSafe(nameof(AccentColor).Replace("Color", string.Empty), WinFormsColor.DeepSkyBlue); }
         }
 
         /// <summary>
@@ -409,7 +409,7 @@ namespace WinMemoryCleaner
         /// </summary>
         public static WinFormsColor PrimaryBackgroundColor
         {
-            get { return GetColorSafe(Helper.NameOf(() => PrimaryBackgroundColor).Replace("Color", string.Empty), WinFormsColor.FromArgb(32, 32, 32)); }
+            get { return GetColorSafe(nameof(PrimaryBackgroundColor).Replace("Color", string.Empty), WinFormsColor.FromArgb(32, 32, 32)); }
         }
 
         /// <summary>
@@ -417,7 +417,7 @@ namespace WinMemoryCleaner
         /// </summary>
         public static WinFormsColor SecondaryBackgroundColor
         {
-            get { return GetColorSafe(Helper.NameOf(() => SecondaryBackgroundColor).Replace("Color", string.Empty), WinFormsColor.DarkSlateGray); }
+            get { return GetColorSafe(nameof(SecondaryBackgroundColor).Replace("Color", string.Empty), WinFormsColor.DarkSlateGray); }
         }
         
         /// <summary>
@@ -425,7 +425,7 @@ namespace WinMemoryCleaner
         /// </summary>
         public static WinFormsColor SecondaryBorderColor
         {
-            get { return GetColorSafe(Helper.NameOf(() => SecondaryBorderColor).Replace("Color", string.Empty), WinFormsColor.DimGray); }
+            get { return GetColorSafe(nameof(SecondaryBorderColor).Replace("Color", string.Empty), WinFormsColor.DimGray); }
         }
 
         /// <summary>
@@ -433,7 +433,7 @@ namespace WinMemoryCleaner
         /// </summary>
         public static WinFormsColor SecondaryForegroundColor
         {
-            get { return GetColorSafe(Helper.NameOf(() => SecondaryForegroundColor).Replace("Color", string.Empty), WinFormsColor.White); }
+            get { return GetColorSafe(nameof(SecondaryForegroundColor).Replace("Color", string.Empty), WinFormsColor.White); }
         }
 
         private static WinFormsColor GetColorSafe(string resourceKey, WinFormsColor fallback)
