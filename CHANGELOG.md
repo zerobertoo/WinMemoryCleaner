@@ -1,3 +1,17 @@
+### 3.1.0
+
+**2026-10-15**
+
+Primeira versão do fork [zerobertoo/WinMemoryCleaner](https://github.com/zerobertoo/WinMemoryCleaner).
+
+- Migrado de .NET Framework 4.0 para .NET 10 (executável único, requer o .NET 10 Desktop Runtime)
+- Corrigido o auto-update, que nunca aplicava a atualização em executável único
+- Reduzido o consumo de CPU em idle: removido busy-loop dos monitores e menor overhead do GC
+- Removidos a janela de doação e os links de apoio do projeto original
+- Atualizador, README e templates apontam para este repositório
+- Adicionados testes de i18n (chaves e placeholders dos 30 idiomas) e de formatação JSON
+- Corrigidos os workflows de CI e release
+
 ### 3.0.8
 
 **2025-12-13**
