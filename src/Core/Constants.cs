@@ -75,8 +75,8 @@ namespace WinMemoryCleaner
 
             public static class Repository
             {
-                private const string GitHub = "https://github.com/IgorMundstein/WinMemoryCleaner";
-                private const string GitHubRaw = "https://raw.githubusercontent.com/IgorMundstein/WinMemoryCleaner/main";
+                private const string GitHub = "https://github.com/zerobertoo/WinMemoryCleaner";
+                private const string GitHubRaw = "https://raw.githubusercontent.com/zerobertoo/WinMemoryCleaner/main";
 
                 public static readonly Uri AboutUri = new Uri(GitHub + "?tab=readme-ov-file#windows-memory-cleaner");
                 public static readonly Uri AssemblyInfoUri = new Uri(GitHubRaw + "/src/Properties/AssemblyInfo.cs");
