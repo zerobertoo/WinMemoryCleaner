@@ -133,7 +133,7 @@ namespace WinMemoryCleaner
                 // Process Exclusion List
                 using (var key = Registry.LocalMachine.OpenSubKey(Constants.App.Registry.Key.ProcessExclusionList))
                 {
-                    if (key != null)
+                    if (key is not null)
                     {
                         foreach (var name in key.GetValueNames())
                             ProcessExclusionList.Add(name.RemoveWhitespaces().Replace(".exe", string.Empty).ToLower(_culture));
@@ -143,7 +143,7 @@ namespace WinMemoryCleaner
                 // Settings
                 using (var key = Registry.LocalMachine.OpenSubKey(Constants.App.Registry.Key.Settings))
                 {
-                    if (key != null)
+                    if (key is not null)
                     {
                         AlwaysOnTop = Convert.ToBoolean(key.GetValue(nameof(AlwaysOnTop), AlwaysOnTop), _culture);
                         AutoOptimizationInterval = Convert.ToInt32(key.GetValue(nameof(AutoOptimizationInterval), AutoOptimizationInterval), _culture);
@@ -247,7 +247,7 @@ namespace WinMemoryCleaner
                 {
                     using (var key = Registry.LocalMachine.CreateSubKey(Constants.App.Registry.Key.ProcessExclusionList))
                     {
-                        if (key != null)
+                        if (key is not null)
                         {
                             foreach (var process in ProcessExclusionList)
                                 key.SetValue(process.RemoveWhitespaces().Replace(".exe", string.Empty).ToLower(_culture), string.Empty, RegistryValueKind.String);
@@ -258,7 +258,7 @@ namespace WinMemoryCleaner
                 // Settings
                 using (var key = Registry.LocalMachine.CreateSubKey(Constants.App.Registry.Key.Settings))
                 {
-                    if (key != null)
+                    if (key is not null)
                     {
                         key.SetValue(nameof(AlwaysOnTop), AlwaysOnTop ? 1 : 0);
                         key.SetValue(nameof(AutoOptimizationInterval), AutoOptimizationInterval);

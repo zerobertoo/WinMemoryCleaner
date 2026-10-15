@@ -151,7 +151,7 @@ namespace WinMemoryCleaner
                 Logger.Debug(e);
             }
 
-            if (hotKey != null && _registered.TryGetValue(hotKey, out action))
+            if (hotKey is not null && _registered.TryGetValue(hotKey, out action))
                 action();
         }
 
@@ -167,7 +167,7 @@ namespace WinMemoryCleaner
 
             try
             {
-                if (!_isSupported || hotkey == null || action == null)
+                if (!_isSupported || hotkey is null || action is null)
                     return false;
 
                 Unregister(hotkey);
@@ -196,7 +196,7 @@ namespace WinMemoryCleaner
 
             try
             {
-                if (!_isSupported || hotkey == null)
+                if (!_isSupported || hotkey is null)
                     return false;
 
                 result = NativeMethods.UnregisterHotKey(IntPtr.Zero, hotkey.GetHashCode());

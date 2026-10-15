@@ -56,7 +56,7 @@ namespace WinMemoryCleaner
         {
             get
             {
-                if (_operatingSystem == null)
+                if (_operatingSystem is null)
                 {
                     var operatingSystem = Environment.OSVersion;
 
@@ -163,7 +163,7 @@ namespace WinMemoryCleaner
             {
                 try
                 {
-                    if (OnOptimizeProgressUpdate != null)
+                    if (OnOptimizeProgressUpdate is not null)
                     {
                         value++;
                         OnOptimizeProgressUpdate(value, Localizer.String.WorkingSet);
@@ -199,7 +199,7 @@ namespace WinMemoryCleaner
             {
                 try
                 {
-                    if (OnOptimizeProgressUpdate != null)
+                    if (OnOptimizeProgressUpdate is not null)
                     {
                         value++;
                         OnOptimizeProgressUpdate(value, Localizer.String.SystemFileCache);
@@ -235,7 +235,7 @@ namespace WinMemoryCleaner
             {
                 try
                 {
-                    if (OnOptimizeProgressUpdate != null)
+                    if (OnOptimizeProgressUpdate is not null)
                     {
                         value++;
                         OnOptimizeProgressUpdate(value, Localizer.String.ModifiedPageList);
@@ -274,7 +274,7 @@ namespace WinMemoryCleaner
 
                 try
                 {
-                    if (OnOptimizeProgressUpdate != null)
+                    if (OnOptimizeProgressUpdate is not null)
                     {
                         value++;
                         OnOptimizeProgressUpdate(value, standbyList);
@@ -310,7 +310,7 @@ namespace WinMemoryCleaner
             {
                 try
                 {
-                    if (OnOptimizeProgressUpdate != null)
+                    if (OnOptimizeProgressUpdate is not null)
                     {
                         value++;
                         OnOptimizeProgressUpdate(value, Localizer.String.CombinedPageList);
@@ -346,7 +346,7 @@ namespace WinMemoryCleaner
             {
                 try
                 {
-                    if (OnOptimizeProgressUpdate != null)
+                    if (OnOptimizeProgressUpdate is not null)
                     {
                         value++;
                         OnOptimizeProgressUpdate(value, Localizer.String.RegistryCache);
@@ -382,7 +382,7 @@ namespace WinMemoryCleaner
             {
                 try
                 {
-                    if (OnOptimizeProgressUpdate != null)
+                    if (OnOptimizeProgressUpdate is not null)
                     {
                         value++;
                         OnOptimizeProgressUpdate(value, Localizer.String.ModifiedFileCache);
@@ -416,7 +416,7 @@ namespace WinMemoryCleaner
             // Garbage Collector
             try
             {
-                if (OnOptimizeProgressUpdate != null)
+                if (OnOptimizeProgressUpdate is not null)
                 {
                     value++;
                     OnOptimizeProgressUpdate(value, Localizer.String.GarbageCollector);
@@ -502,12 +502,12 @@ namespace WinMemoryCleaner
 
             foreach (var drive in DriveInfo.GetDrives())
             {
-                if (drive == null || drive.DriveType != DriveType.Fixed || string.IsNullOrWhiteSpace(drive.Name))
+                if (drive is null || drive.DriveType != DriveType.Fixed || string.IsNullOrWhiteSpace(drive.Name))
                     continue;
 
                 using (var handle = OpenVolumeHandle(drive.Name))
                 {
-                    if (handle == null || handle.IsInvalid)
+                    if (handle is null || handle.IsInvalid)
                         continue;
 
                     int bytesReturned;
@@ -721,7 +721,7 @@ namespace WinMemoryCleaner
                 if (!SetIncreasePrivilege(Constants.Windows.Privilege.SeDebugName))
                     throw new Exception(string.Format(Localizer.Culture, Localizer.String.ErrorAdminPrivilegeRequired, Constants.Windows.Privilege.SeDebugName));
 
-                var processes = Process.GetProcesses().Where(process => process != null && !Settings.ProcessExclusionList.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase));
+                var processes = Process.GetProcesses().Where(process => process is not null && !Settings.ProcessExclusionList.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase));
 
                 foreach (var process in processes)
                 {
@@ -761,7 +761,7 @@ namespace WinMemoryCleaner
                     {
                         var e = new Win32Exception(Marshal.GetLastWin32Error());
 
-                        if (e != null)
+                        if (e is not null)
                         {
                             if (errors.Length > 0)
                                 errors.Append(" | ");

@@ -137,7 +137,7 @@ namespace WinMemoryCleaner
                 // Settings  
                 using (var userKey = Registry.CurrentUser.OpenSubKey(Constants.App.Registry.Key.Settings))
                 {
-                    if (userKey == null)
+                    if (userKey is null)
                         return;
 
                     using (var machineKey = Registry.LocalMachine.CreateSubKey(Constants.App.Registry.Key.Settings))
@@ -196,7 +196,7 @@ namespace WinMemoryCleaner
                 // Process Exclusion List
                 using (var userKey = Registry.CurrentUser.OpenSubKey(Constants.App.Registry.Key.ProcessExclusionList))
                 {
-                    if (userKey != null)
+                    if (userKey is not null)
                     {
                         Registry.LocalMachine.DeleteSubKey(Constants.App.Registry.Key.ProcessExclusionList, false);
 
@@ -228,7 +228,7 @@ namespace WinMemoryCleaner
             {
                 using (var key = Registry.LocalMachine.OpenSubKey(Constants.App.Registry.Key.Settings, true))
                 {
-                    if (key != null && key.GetValue(V30.Registry.Path, null) != null)
+                    if (key is not null && key.GetValue(V30.Registry.Path, null) != null)
                     {
                         key.DeleteValue(V30.Registry.Path, false);
 
@@ -251,7 +251,7 @@ namespace WinMemoryCleaner
             {
                 using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run", true))
                 {
-                    if (key != null && key.GetValue(Constants.App.Title, null) != null)
+                    if (key is not null && key.GetValue(Constants.App.Title, null) != null)
                     {
                         key.DeleteValue(Constants.App.Title);
 

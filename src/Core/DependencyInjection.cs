@@ -70,10 +70,10 @@ namespace WinMemoryCleaner
                 if (type.IsInterface && _container.TryGetValue(type, out func))
                     instance = func();
 
-                if (!type.IsInterface && instance == null)
+                if (!type.IsInterface && instance is null)
                     instance = Activator.CreateInstance(type, type.GetConstructors().SingleOrDefault().GetParameters().Select(p => Resolve(p.ParameterType)).ToArray());
 
-                if (instance == null)
+                if (instance is null)
                     throw new InvalidOperationException(string.Format(Localizer.Culture, "{0} is not registered.", type.Name));
 
                 if (_singleton.ContainsKey(type))

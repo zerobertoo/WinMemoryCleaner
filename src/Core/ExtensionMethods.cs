@@ -117,7 +117,7 @@ namespace WinMemoryCleaner
         /// </summary>
         public static string GetMessage(this Exception obj)
         {
-            if (obj == null)
+            if (obj is null)
                 return null;
 
             var exception = obj;
@@ -141,7 +141,7 @@ namespace WinMemoryCleaner
 
                 exception = exception.InnerException;
             }
-            while (exception != null);
+            while (exception is not null);
 
             return string.Join(". ", messages.Distinct());
         }
@@ -180,9 +180,6 @@ namespace WinMemoryCleaner
         /// </returns>
         public static bool IsEquals(this System.Windows.Media.Color obj, Color color)
         {
-            if (obj == null)
-                return false;
-
             return obj.A == color.A && obj.R == color.R && obj.G == color.G && obj.B == color.B;
         }
 
@@ -195,7 +192,7 @@ namespace WinMemoryCleaner
         /// </returns>
         public static bool IsNumber(this object obj)
         {
-            if (obj == null)
+            if (obj is null)
                 return false;
 
             switch (Type.GetTypeCode(obj.GetType()))
@@ -227,7 +224,7 @@ namespace WinMemoryCleaner
         /// </returns>
         public static bool IsValid(this Enum obj)
         {
-            if (obj == null)
+            if (obj is null)
                 return false;
 
             var firstDigit = obj.ToString()[0];
@@ -254,7 +251,7 @@ namespace WinMemoryCleaner
         {
             var mediaBrush = obj as System.Windows.Media.SolidColorBrush;
 
-            if (mediaBrush == null)
+            if (mediaBrush is null)
                 return null;
 
             return new SolidBrush(Color.FromArgb(mediaBrush.Color.A, mediaBrush.Color.R, mediaBrush.Color.G, mediaBrush.Color.B));

@@ -59,7 +59,7 @@ namespace WinMemoryCleaner
         /// </summary>
         internal static void Dispose()
         {
-            if (_consoleWriter != null)
+            if (_consoleWriter is not null)
             {
                 try
                 {
@@ -82,7 +82,7 @@ namespace WinMemoryCleaner
                 _consoleWriter = null;
             }
 
-            if (_consoleStream != null)
+            if (_consoleStream is not null)
             {
                 try
                 {
@@ -96,7 +96,7 @@ namespace WinMemoryCleaner
                 _consoleStream = null;
             }
 
-            if (_consoleHandle != null)
+            if (_consoleHandle is not null)
             {
                 try
                 {
@@ -121,7 +121,7 @@ namespace WinMemoryCleaner
         /// <value>
         ///   <c>true</c> if console output is enabled; otherwise, <c>false</c>.
         /// </value>
-        private static bool IsConsoleEnabled { get { return _consoleWriter != null; } }
+        private static bool IsConsoleEnabled { get { return _consoleWriter is not null; } }
 
         private static bool IsDebugEnabled { get { return (_level & Enums.Log.Levels.Debug) != 0; } }
 
@@ -275,15 +275,15 @@ namespace WinMemoryCleaner
                 try
                 {
                     var stackTrace = new StackTrace(exception, true);
-                    if (stackTrace != null && stackTrace.FrameCount > 0)
+                    if (stackTrace is not null && stackTrace.FrameCount > 0)
                     {
                         var frame = stackTrace.GetFrame(stackTrace.FrameCount - 1);
 
-                        if (frame != null)
+                        if (frame is not null)
                         {
                             var methodBase = frame.GetMethod();
 
-                            if (methodBase != null && methodBase.DeclaringType != null)
+                            if (methodBase is not null && methodBase.DeclaringType is not null)
                                 method = string.Format(Localizer.Culture, "{0}.{1}", methodBase.DeclaringType.Name, methodBase.Name);
                         }
                     }
@@ -294,7 +294,7 @@ namespace WinMemoryCleaner
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(message) && exception != null)
+            if (string.IsNullOrWhiteSpace(message) && exception is not null)
                 message = exception.GetMessage();
 
             Log(new Log(level, message, null, method));
@@ -318,7 +318,7 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (log == null)
+                if (log is null)
                     throw new ArgumentNullException("log");
 
                 var message = log.Message;
@@ -364,7 +364,7 @@ namespace WinMemoryCleaner
             }
             catch (Exception e)
             {
-                Event(string.Format(Localizer.Culture, Localizer.String.ErrorCanNotSaveLog, log != null ? log.Message : "NULL", e.GetMessage()), EventLogEntryType.Error);
+                Event(string.Format(Localizer.Culture, Localizer.String.ErrorCanNotSaveLog, log is not null ? log.Message : "NULL", e.GetMessage()), EventLogEntryType.Error);
             }
         }
 

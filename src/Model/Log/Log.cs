@@ -73,12 +73,12 @@ namespace WinMemoryCleaner
         public object ToJson()
         {
             var jsonSerializable = Data as IJsonSerializable;
-            var data = jsonSerializable != null ? jsonSerializable.ToJson() : null;
+            var data = jsonSerializable is not null ? jsonSerializable.ToJson() : null;
 
             var level = Level.ToString();
             var timestamp = Timestamp.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture);
 
-            return data == null
+            return data is null
                 ? new { timestamp, level, method = Method, message = Message, data = (object)null }
                 : (object)new { timestamp, level, method = Method, message = Message, data };
         }

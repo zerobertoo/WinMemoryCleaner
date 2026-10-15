@@ -23,7 +23,7 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (e.Error != null)
+                if (e.Error is not null)
                     throw new Exception("File download failed.", e.Error);
 
                 if (e.Cancelled)
@@ -65,7 +65,7 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (e.Error != null)
+                if (e.Error is not null)
                     throw new Exception("Version check failed.", e.Error);
 
                 if (e.Cancelled)
@@ -106,7 +106,7 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (_client != null)
+                if (_client is not null)
                     _client.Dispose();
             }
             finally
@@ -116,7 +116,7 @@ namespace WinMemoryCleaner
 
             try
             {
-                if (Process != null)
+                if (Process is not null)
                     Process = null;
             }
             catch

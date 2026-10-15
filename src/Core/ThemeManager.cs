@@ -121,7 +121,7 @@ namespace WinMemoryCleaner
 
                 try
                 {
-                    if (_initializationTimer != null)
+                    if (_initializationTimer is not null)
                         _initializationTimer.Change(INITIALIZATION_TIMEOUT_MS, Timeout.Infinite);
 
                     InitializeDefaults();
@@ -131,7 +131,7 @@ namespace WinMemoryCleaner
                     _isInitialized = true;
                     _isInitializing = false;
 
-                    if (_initializationTimer != null)
+                    if (_initializationTimer is not null)
                         _initializationTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
                     Monitor.PulseAll(_initializationLock);
@@ -184,7 +184,7 @@ namespace WinMemoryCleaner
             try
             {
                 var app = WpfApplication.Current;
-                if (app == null || app.Resources == null)
+                if (app is null || app.Resources is null)
                 {
                     Logger.Warning("Application.Current or Resources is null during theme initialization");
                     return;
@@ -232,7 +232,7 @@ namespace WinMemoryCleaner
             try
             {
                 var enumValues = Enum.GetValues(typeof(Enums.Theme));
-                if (enumValues == null || enumValues.Length == 0)
+                if (enumValues is null || enumValues.Length == 0)
                 {
                     _themes = new List<Enums.Theme> { Enums.Theme.Dark };
                     return;
@@ -265,14 +265,14 @@ namespace WinMemoryCleaner
             try
             {
                 var colorType = typeof(WinFormsColor);
-                if (colorType == null)
+                if (colorType is null)
                 {
                     _brushes = new List<WpfBrush>();
                     return;
                 }
 
                 var colorProperties = colorType.GetProperties(BindingFlags.Public | BindingFlags.Static);
-                if (colorProperties == null || colorProperties.Length == 0)
+                if (colorProperties is null || colorProperties.Length == 0)
                 {
                     _brushes = new List<WpfBrush>();
                     return;
@@ -291,7 +291,7 @@ namespace WinMemoryCleaner
                             break;
                         }
 
-                        if (property == null || property.PropertyType != typeof(WinFormsColor))
+                        if (property is null || property.PropertyType != typeof(WinFormsColor))
                             continue;
 
                         var color = (WinFormsColor)property.GetValue(null, null);
@@ -305,7 +305,7 @@ namespace WinMemoryCleaner
                     }
                     catch (Exception e)
                     {
-                        var propertyName = (property != null) ? property.Name : "unknown";
+                        var propertyName = (property is not null) ? property.Name : "unknown";
                         Logger.Error("Failed to process color property " + propertyName + ": " + e.Message);
                     }
                 }
@@ -334,7 +334,7 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (brush == null)
+                if (brush is null)
                     return 0f;
 
                 var color = brush.Color;
@@ -356,7 +356,7 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (brush == null)
+                if (brush is null)
                     return 0f;
 
                 var color = brush.Color;
@@ -378,7 +378,7 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (brush == null)
+                if (brush is null)
                     return 0f;
 
                 var color = brush.Color;
@@ -458,11 +458,11 @@ namespace WinMemoryCleaner
                 EnsureInitialized();
 
                 var app = WpfApplication.Current;
-                if (app == null || app.Resources == null)
+                if (app is null || app.Resources is null)
                     return fallback;
 
                 var resource = app.Resources[resourceKey] as WpfBrush;
-                if (resource == null)
+                if (resource is null)
                     return fallback;
 
                 var color = resource.Color;
@@ -496,7 +496,7 @@ namespace WinMemoryCleaner
                 lock (_lockObject)
                 {
                     var brushes = _brushes;
-                    if (brushes == null || brushes.Count == 0)
+                    if (brushes is null || brushes.Count == 0)
                         return new List<WpfBrush>();
 
                     return new List<WpfBrush>(brushes);
@@ -574,7 +574,7 @@ namespace WinMemoryCleaner
                 lock (_lockObject)
                 {
                     var themes = _themes;
-                    if (themes == null || themes.Count == 0)
+                    if (themes is null || themes.Count == 0)
                     {
                         return new List<Enums.Theme> { Enums.Theme.Dark };
                     }
@@ -642,7 +642,7 @@ namespace WinMemoryCleaner
                 return;
             }
 
-            if (resource == null)
+            if (resource is null)
             {
                 Logger.Warning("Theme resource is null for " + theme);
                 return;
@@ -651,14 +651,14 @@ namespace WinMemoryCleaner
             try
             {
                 var app = WpfApplication.Current;
-                if (app == null || app.Resources == null)
+                if (app is null || app.Resources is null)
                 {
                     Logger.Warning("Application.Current or Resources is null during theme loading");
                     return;
                 }
 
                 var properties = typeof(Theme).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                if (properties == null || properties.Length == 0)
+                if (properties is null || properties.Length == 0)
                 {
                     Logger.Warning("No properties found on Theme class");
                     return;
@@ -666,7 +666,7 @@ namespace WinMemoryCleaner
 
                 foreach (var property in properties)
                 {
-                    if (property == null)
+                    if (property is null)
                         continue;
 
                     if (!IsValidResourceKey(property.Name))
@@ -742,7 +742,7 @@ namespace WinMemoryCleaner
             {
                 lock (_initializationLock)
                 {
-                    if (_initializationTimer != null)
+                    if (_initializationTimer is not null)
                         _initializationTimer.Dispose();
                 }
 

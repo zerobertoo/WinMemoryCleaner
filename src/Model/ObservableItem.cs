@@ -77,10 +77,10 @@ namespace WinMemoryCleaner
         /// </value>
         public T Value
         {
-            get { return Getter != null ? Getter() : default(T); }
+            get { return Getter is not null ? Getter() : default(T); }
             set
             {
-                if (Setter != null)
+                if (Setter is not null)
                 {
                     Setter(value);
                     RaisePropertyChanged();

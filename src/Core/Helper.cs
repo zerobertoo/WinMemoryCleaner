@@ -172,7 +172,7 @@ namespace WinMemoryCleaner
             {
                 var entry = Assembly.GetEntryAssembly();
 
-                if (entry != null && !string.IsNullOrEmpty(entry.Location))
+                if (entry is not null && !string.IsNullOrEmpty(entry.Location))
                     return entry.Location;
             }
             catch
@@ -211,7 +211,7 @@ namespace WinMemoryCleaner
                 {
                     var os = Environment.OSVersion;
 
-                    if (os.Version != null && os.Version.Major < 6)
+                    if (os.Version is not null && os.Version.Major < 6)
                         return false; // Windows XP/2003 and earlier
                 }
                 catch
@@ -230,12 +230,12 @@ namespace WinMemoryCleaner
         /// <returns>The string name of the member.</returns>
         public static string NameOf<T>(Expression<Func<T>> expression)
         {
-            if (expression == null)
+            if (expression is null)
                 throw new ArgumentNullException("expression");
 
             var memberExpression = expression.Body as MemberExpression;
 
-            if (memberExpression == null)
+            if (memberExpression is null)
                 throw new ArgumentException("Expression must be a simple member access (e.g., () => myObject.MyProperty).");
 
             return memberExpression.Member.Name;
@@ -263,7 +263,7 @@ namespace WinMemoryCleaner
         /// <returns>A JSON string representation of the object.</returns>
         public static string Serialize(IJsonSerializable obj, bool minified = false)
         {
-            if (obj == null)
+            if (obj is null)
                 throw new ArgumentNullException("obj");
 
             var json = JsonSerializer.Serialize<object>(obj.ToJson());
@@ -312,7 +312,7 @@ namespace WinMemoryCleaner
         /// <returns></returns>
         public static string ToHexCode(byte red, byte green, byte blue, byte? alpha = null)
         {
-            if (alpha != null)
+            if (alpha is not null)
                 return string.Format(Localizer.Culture, "#{0:X2}{1:X2}{2:X2}{3:X2}", alpha, red, green, blue);
 
             return string.Format(Localizer.Culture, "#{0:X2}{1:X2}{2:X2}", red, green, blue);
