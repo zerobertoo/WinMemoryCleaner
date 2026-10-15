@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
@@ -220,25 +219,6 @@ namespace WinMemoryCleaner
 
                 return true;
             }
-        }
-
-        /// <summary>
-        /// Gets the string name of a property or field.
-        /// </summary>
-        /// <typeparam name="T">The type of the member.</typeparam>
-        /// <param name="expression">A lambda expression that accesses the member.</param>
-        /// <returns>The string name of the member.</returns>
-        public static string NameOf<T>(Expression<Func<T>> expression)
-        {
-            if (expression is null)
-                throw new ArgumentNullException("expression");
-
-            var memberExpression = expression.Body as MemberExpression;
-
-            if (memberExpression is null)
-                throw new ArgumentException("Expression must be a simple member access (e.g., () => myObject.MyProperty).");
-
-            return memberExpression.Member.Name;
         }
 
         /// <summary>

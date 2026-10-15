@@ -709,21 +709,6 @@ namespace WinMemoryCleaner.Test
             }
 
             [Test]
-            public void NameOf_WithNullExpression_ThrowsArgumentNullException()
-            {
-                Assert.Throws<ArgumentNullException>(() => Helper.NameOf<object>(null));
-            }
-
-            [Test]
-            public void NameOf_WithValidExpression_ReturnsPropertyName()
-            {
-                var testObject = new { TestProperty = "value" };
-                var name = Helper.NameOf(() => testObject.TestProperty);
-
-                Assert.AreEqual("TestProperty", name);
-            }
-
-            [Test]
             public void Serialize_WithMinifiedTrue_ReturnsCompactJson()
             {
                 var obj = new TestJsonSerializable { Name = "Test", Value = 123 };

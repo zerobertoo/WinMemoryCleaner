@@ -44,10 +44,9 @@ Removido (sem nenhuma referência em `src/`): `Constants.App.Defaults.Path`.
 Mantido por ser usado apenas internamente: `EmbeddedResourcePath` (compõe
 `LocalizationResourcePath` e `ThemesResourcePath`).
 
-Sem referência externa, mas mantido a pedido (decisão do dono):
-`Certificate.Release.Thumbprint` e `Certificate.Test.Thumbprint`.
+Removidos junto com a janela de doação: `Donation.*` e `Certificate.*`.
 
-### Análise e recomendações (nada foi alterado)
+### Decisões (aplicadas)
 
 - **Donation** (`BitcoinUri`, `EthereumUri`, `GitHubSponsorUri`, `KofiUri`):
   carteiras e links do autor original (Igor Mundstein), usados por

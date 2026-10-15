@@ -15,7 +15,7 @@ body:
       label: What have you tried so far?
       description: "Let us know what you've already tried to find the answer."
       options:
-        - label: I have searched the existing [issues](https://github.com/IgorMundstein/WinMemoryCleaner/issues) for a similar question.
+        - label: I have searched the existing [issues](https://github.com/zerobertoo/WinMemoryCleaner/issues) for a similar question.
           required: true
-        - label: I have read the [README.md](https://github.com/IgorMundstein/WinMemoryCleaner/blob/main/README.md) file.
+        - label: I have read the [README.md](https://github.com/zerobertoo/WinMemoryCleaner/blob/main/README.md) file.
           required: true
