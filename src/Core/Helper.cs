@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
-using System.Web.Script.Serialization;
+using System.Text.Json;
 
 namespace WinMemoryCleaner
 {
@@ -49,7 +49,7 @@ namespace WinMemoryCleaner
         /// <returns></returns>
         public static T Deserialize<T>(string obj)
         {
-            return new JavaScriptSerializer().Deserialize<T>(obj);
+            return JsonSerializer.Deserialize<T>(obj, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, IncludeFields = true });
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace WinMemoryCleaner
             if (obj == null)
                 throw new ArgumentNullException("obj");
 
-            var json = new JavaScriptSerializer().Serialize(obj.ToJson());
+            var json = JsonSerializer.Serialize<object>(obj.ToJson());
 
             return minified ? json : FormatJson(json);
         }

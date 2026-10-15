@@ -1,46 +1,15 @@
 ﻿using System;
-using System.Collections;
-using System.ComponentModel;
-using System.Configuration.Install;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.ServiceProcess;
 
 namespace WinMemoryCleaner
 {
     /// <summary>
-    /// Windows Memory Cleaner Service Installer
+    /// Windows Memory Cleaner Service Installer (uses sc.exe, since System.Configuration.Install does not exist in modern .NET)
     /// </summary>
-    [RunInstaller(true)]
-    public class WinServiceInstaller : Installer
+    public static class WinServiceInstaller
     {
-        private readonly ServiceInstaller _serviceInstaller;
-        private readonly ServiceProcessInstaller _processInstaller;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WinServiceInstaller" /> class.
-        /// </summary>
-        public WinServiceInstaller()
-        {
-            _processInstaller = new ServiceProcessInstaller
-            {
-                Account = ServiceAccount.LocalSystem
-            };
-
-            _serviceInstaller = new ServiceInstaller
-            {
-                DelayedAutoStart = true,
-                Description = Constants.App.Repository.Uri.ToString(),
-                DisplayName = Constants.App.Title,
-                ServiceName = Constants.App.Name,
-                StartType = ServiceStartMode.Automatic
-            };
-
-            Installers.Add(_processInstaller);
-            Installers.Add(_serviceInstaller);
-        }
-
         /// <summary>
         /// Installs the service
         /// </summary>
@@ -48,21 +17,15 @@ namespace WinMemoryCleaner
         {
             Uninstall();
 
-            ManagedInstallerClass.InstallHelper(new[]
-            {
-                "/LogFile=" + Constants.App.Name + ".log",
-                "/LogToConsole=true",
-                Assembly.GetExecutingAssembly().Location
-            });
-        }
+            var executablePath = Environment.ProcessPath;
 
-        /// <summary>
-        /// Raises the <see cref="E:System.Configuration.Install.Installer.AfterInstall" /> event.
-        /// </summary>
-        /// <param name="savedState">An <see cref="T:System.Collections.IDictionary" /> that contains the state of the computer after all the installers contained in the <see cref="P:System.Configuration.Install.Installer.Installers" /> property have completed their installations.</param>
-        protected override void OnAfterInstall(IDictionary savedState)
-        {
-            base.OnAfterInstall(savedState);
+            RunServiceControl("create", Constants.App.Name,
+                "binPath=", "\"" + executablePath + "\" /Service",
+                "start=", "delayed-auto",
+                "DisplayName=", Constants.App.Title,
+                "obj=", "LocalSystem");
+
+            RunServiceControl("description", Constants.App.Name, Constants.App.Repository.Uri.ToString());
 
             // Service recommended settings
             Settings.AutoOptimizationInterval = Settings.AutoOptimizationInterval == 0 ? 24 : Settings.AutoOptimizationInterval;
@@ -77,30 +40,8 @@ namespace WinMemoryCleaner
             App.RunOnStartup(false);
 
             // Start service after install
-            using (var sc = new ServiceController(_serviceInstaller.ServiceName))
+            using (var sc = new ServiceController(Constants.App.Name))
                 sc.Start();
-        }
-
-        /// <summary>
-        /// Raises the <see cref="E:System.Configuration.Install.Installer.BeforeInstall" /> event.
-        /// </summary>
-        /// <param name="savedState">An <see cref="T:System.Collections.IDictionary" /> that contains the state of the computer before the installers in the <see cref="P:System.Configuration.Install.Installer.Installers" /> property are installed. This <see cref="T:System.Collections.IDictionary" /> object should be empty at this point.</param>
-        protected override void OnBeforeInstall(IDictionary savedState)
-        {
-            Context.Parameters["assemblypath"] = "\"" + Context.Parameters["assemblypath"] + "\" /Service";
-
-            base.OnBeforeInstall(savedState);
-        }
-
-        /// <summary>
-        /// Raises the <see cref="E:System.Configuration.Install.Installer.BeforeUninstall" /> event.
-        /// </summary>
-        /// <param name="savedState">An <see cref="T:System.Collections.IDictionary" /> that contains the state of the computer before the installers in the <see cref="P:System.Configuration.Install.Installer.Installers" /> property uninstall their installations.</param>
-        protected override void OnBeforeUninstall(IDictionary savedState)
-        {
-            Context.Parameters["assemblypath"] = "\"" + Context.Parameters["assemblypath"] + "\" /Service";
-
-            base.OnBeforeUninstall(savedState);
         }
 
         /// <summary>
@@ -108,47 +49,66 @@ namespace WinMemoryCleaner
         /// </summary>
         public static void Uninstall()
         {
-            if (WinService.IsInstalled)
+            if (!WinService.IsInstalled)
+                return;
+
+            // Processes that block service refresh/uninstallation
+            var processesToKill = new[] { "mmc", "procexp", "procexp64", "taskmgr" };
+
+            KillProcesses(Process.GetProcesses().Where(process => process != null && processesToKill.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase)));
+
+            try
             {
-                // Processess that blocks service refresh/uninstallation
-                var processesToKill = new[] { "mmc", "procexp", "procexp64", "taskmgr" };
-                var processes = Process.GetProcesses().Where(process => process != null && processesToKill.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase));
-
-                foreach (var process in processes)
+                using (var sc = new ServiceController(Constants.App.Name))
                 {
-                    try
+                    if (sc.Status != ServiceControllerStatus.Stopped)
                     {
-                        process.Kill();
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                }
-
-                ManagedInstallerClass.InstallHelper(new[]
-                {
-                    "/Uninstall",
-                    "/LogFile=" + Constants.App.Name + ".log",
-                    "/LogToConsole=true",
-                    Assembly.GetExecutingAssembly().Location
-                });
-
-                // Kill any remaining process
-                processes = Process.GetProcessesByName(Constants.App.Name);
-
-                foreach (var process in processes)
-                {
-                    try
-                    {
-                        process.Kill();
-                    }
-                    catch
-                    {
-                        // ignored
+                        sc.Stop();
+                        sc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
                     }
                 }
             }
+            catch
+            {
+                // ignored
+            }
+
+            RunServiceControl("delete", Constants.App.Name);
+
+            // Kill any remaining process (except the current one)
+            var currentProcessId = Process.GetCurrentProcess().Id;
+
+            KillProcesses(Process.GetProcessesByName(Constants.App.Name).Where(process => process.Id != currentProcessId));
+        }
+
+        private static void KillProcesses(System.Collections.Generic.IEnumerable<Process> processes)
+        {
+            foreach (var process in processes)
+            {
+                try
+                {
+                    process.Kill();
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+        }
+
+        private static void RunServiceControl(params string[] arguments)
+        {
+            var startInfo = new ProcessStartInfo("sc.exe")
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+
+            foreach (var argument in arguments)
+                startInfo.ArgumentList.Add(argument);
+
+            using (var process = Process.Start(startInfo))
+                process.WaitForExit();
         }
     }
 }
