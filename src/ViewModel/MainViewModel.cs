@@ -1617,13 +1617,13 @@ namespace WinMemoryCleaner
             {
                 try
                 {
-                    // Check if it's busy
-                    if (IsBusy)
-                        continue;
-
                     // Delay
                     if (_cancellationTokenSource.Token.WaitHandle.WaitOne(60000))
                         break;
+
+                    // Check if it's busy
+                    if (IsBusy)
+                        continue;
 
                     // Update app
                     Updater.Update();
@@ -1704,19 +1704,19 @@ namespace WinMemoryCleaner
             {
                 try
                 {
-                    // Check if it's busy
-                    if (IsBusy)
-                        continue;
-
-                    lock (_lockObject)
+                    // Skip the update while busy, but keep waiting below (a bare "continue" here spins a CPU core)
+                    if (!IsBusy)
                     {
-                        // Update memory info
-                        Computer.Memory = _computerService.Memory;
+                        lock (_lockObject)
+                        {
+                            // Update memory info
+                            Computer.Memory = _computerService.Memory;
 
-                        RaisePropertyChanged(() => Computer);
-                        RaisePropertyChanged(() => VirtualMemoryHeader);
+                            RaisePropertyChanged(() => Computer);
+                            RaisePropertyChanged(() => VirtualMemoryHeader);
 
-                        NotificationService.Update(Computer.Memory, IsOptimizationRunning);
+                            NotificationService.Update(Computer.Memory, IsOptimizationRunning);
+                        }
                     }
 
                     // Delay
