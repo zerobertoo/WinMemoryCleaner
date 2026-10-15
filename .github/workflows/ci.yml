@@ -12,7 +12,6 @@ on:
       - main
       - develop
   workflow_dispatch:
-    branches: [main, develop]
 
 permissions:
   contents: read
@@ -92,9 +91,6 @@ jobs:
         run: |
           $assemblyInfoPath = "src/Properties/AssemblyInfo.cs"
           if (-Not (Test-Path $assemblyInfoPath)) {
-            $assemblyInfoPath = "src/Properties/AssemblyInfo.cs"
-          }
-          if (-Not (Test-Path $assemblyInfoPath)) {
             Write-Host "::error::AssemblyInfo.cs not found"
             exit 1
           }
@@ -120,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: winmemorycleaner-${{ steps.version.outputs.app_version }}
-          path: src\bin\Release\WinMemoryCleaner.exe
+          path: publishWinMemoryCleaner.exe
           if-no-files-found: error
 
       - name: Determine Test Artifact
