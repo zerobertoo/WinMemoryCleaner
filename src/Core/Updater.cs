@@ -1,11 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Net;
-using System.Reflection;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace WinMemoryCleaner
 {
@@ -14,64 +14,21 @@ namespace WinMemoryCleaner
     /// </summary>
     public static class Updater
     {
-        private static WebClient _client;
+        // HttpClient é thread-safe e feito para ser reutilizado durante toda a vida do app
+        private static readonly HttpClient _client = new HttpClient();
+        private static CancellationTokenSource _cancellation;
         private static DateTimeOffset _lastCheck = DateTimeOffset.MinValue;
 
         internal static ProcessStartInfo Process;
 
-        private static void OnFileDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        /// <summary>
+        /// Consulta a versão mais recente, baixa o executável e prepara o comando de substituição.
+        /// </summary>
+        private static async Task CheckAndDownloadAsync(string[] args, CancellationToken cancellationToken)
         {
             try
             {
-                if (e.Error is not null)
-                    throw new Exception("File download failed.", e.Error);
-
-                if (e.Cancelled)
-                    return;
-
-                var updateInfo = (Tuple<string, string, string, Version, string[]>)e.UserState;
-                var temp = updateInfo.Item1;
-                var path = updateInfo.Item2;
-                var exe = updateInfo.Item3;
-                var newestVersion = updateInfo.Item4;
-                var args = updateInfo.Item5;
-
-                if (File.Exists(temp) && AssemblyName.GetAssemblyName(temp).Version.Equals(newestVersion))
-                {
-                    Process = new ProcessStartInfo
-                    {
-                        Arguments = string.Format(CultureInfo.InvariantCulture, @"/c taskkill /f /im ""{0}"" & move /y ""{1}"" ""{2}"" & start """" ""{2}"" /{3} {4}", exe, temp, path, newestVersion, string.Join(" ", args)),
-                        CreateNoWindow = true,
-                        FileName = "cmd",
-                        RedirectStandardError = false,
-                        RedirectStandardInput = false,
-                        RedirectStandardOutput = false,
-                        UseShellExecute = false,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    };
-
-                    App.Shutdown();
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-
-                Reset();
-            }
-        }
-
-        private static void OnVersionCheckCompleted(object sender, DownloadStringCompletedEventArgs e)
-        {
-            try
-            {
-                if (e.Error is not null)
-                    throw new Exception("Version check failed.", e.Error);
-
-                if (e.Cancelled)
-                    return;
-
-                var assemblyInfo = e.Result;
+                var assemblyInfo = await _client.GetStringAsync(Constants.App.Repository.AssemblyInfoUri, cancellationToken).ConfigureAwait(false);
                 var assemblyVersionMatch = Regex.Match(assemblyInfo, @"AssemblyVersion\(""(.*)""\)\]");
 
                 if (!assemblyVersionMatch.Success)
@@ -80,19 +37,43 @@ namespace WinMemoryCleaner
                 var newestVersion = Version.Parse(assemblyVersionMatch.Groups[1].Value);
 
                 if (App.Version >= newestVersion)
-                {
-                    Reset();
                     return;
-                }
 
                 var exe = Path.GetFileName(App.Path);
                 var temp = Path.Combine(Path.GetTempPath(), exe);
 
                 Helper.DeleteFile(temp);
 
-                var updateInfo = Tuple.Create(temp, App.Path, exe, newestVersion, (string[])e.UserState);
+                using (var response = await _client.GetAsync(Constants.App.Repository.LatestExeUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+                {
+                    response.EnsureSuccessStatusCode();
 
-                _client.DownloadFileAsync(Constants.App.Repository.LatestExeUri, temp, updateInfo);
+                    using (var source = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
+                    using (var destination = File.Create(temp))
+                        await source.CopyToAsync(destination, cancellationToken).ConfigureAwait(false);
+                }
+
+                // Em single-file Assembly.GetName falha (BadImageFormat); a versão vem do recurso de versão do exe
+                if (!File.Exists(temp) || !Version.TryParse(FileVersionInfo.GetVersionInfo(temp).FileVersion, out var downloadedVersion) || !downloadedVersion.Equals(newestVersion))
+                    return;
+
+                Process = new ProcessStartInfo
+                {
+                    Arguments = string.Format(CultureInfo.InvariantCulture, @"/c taskkill /f /im ""{0}"" & move /y ""{1}"" ""{2}"" & start """" ""{2}"" /{3} {4}", exe, temp, App.Path, newestVersion, string.Join(" ", args)),
+                    CreateNoWindow = true,
+                    FileName = "cmd",
+                    RedirectStandardError = false,
+                    RedirectStandardInput = false,
+                    RedirectStandardOutput = false,
+                    UseShellExecute = false,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                App.Shutdown();
+            }
+            catch (OperationCanceledException)
+            {
+                // cancelado por uma nova verificação
             }
             catch (Exception ex)
             {
@@ -106,23 +87,19 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (_client is not null)
-                    _client.Dispose();
-            }
-            finally
-            {
-                _client = null;
-            }
-
-            try
-            {
-                if (Process is not null)
-                    Process = null;
+                _cancellation?.Cancel();
+                _cancellation?.Dispose();
             }
             catch
             {
                 // ignored
             }
+            finally
+            {
+                _cancellation = null;
+            }
+
+            Process = null;
         }
 
         /// <summary>
@@ -139,15 +116,9 @@ namespace WinMemoryCleaner
 
                 Reset();
 
-                _client = new WebClient();
-                _client.DownloadFileCompleted += new AsyncCompletedEventHandler(OnFileDownloadCompleted);
-                _client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(OnVersionCheckCompleted);
+                _cancellation = new CancellationTokenSource();
 
-                ServicePointManager.DefaultConnectionLimit = 10;
-                ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol |= (SecurityProtocolType)3072 | (SecurityProtocolType)12288; // TLS 1.2 | TLS 1.3
-
-                _client.DownloadStringAsync(Constants.App.Repository.AssemblyInfoUri, args);
+                _ = CheckAndDownloadAsync(args, _cancellation.Token);
             }
             catch (Exception ex)
             {

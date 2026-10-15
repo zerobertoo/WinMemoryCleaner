@@ -13,7 +13,6 @@ namespace WinMemoryCleaner.Test
         /// <summary>
         /// Creates a valid MemoryStatusEx struct for testing
         /// </summary>
-        [System.CLSCompliant(false)]
         public static Structs.Windows.MemoryStatusEx CreateMemoryStatusEx
         (
             ulong totalPhysical = 8589934592, // 8 GB

@@ -20,7 +20,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <NoWarn>$(NoWarn);CA1416;IL3000</NoWarn>
+    <NoWarn>$(NoWarn);CA1416;IL3000;WFO0003</NoWarn>
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <TieredPGO>false</TieredPGO>
     <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
@@ -31,7 +31,6 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <NoWarn>$(NoWarn);CS3001;CS3003</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
