@@ -23,6 +23,10 @@ dotnet publish src/WinMemoryCleaner.csproj -c Release -r win-x64 --self-containe
 
 O aplicativo exige execução como administrador (manifest `requireAdministrator`).
 
+## Release
+
+O workflow `release.yml` roda a cada push em `main` (alterando `src/**`) e usa a versão de `AssemblyVersion` em `src/Properties/AssemblyInfo.cs` (Major.Minor.Patch) como tag. Para lançar uma nova versão, atualize esse valor; se a tag já existir, o release é reaproveitado e nenhum novo é criado.
+
 ## Licença
 
 [GPL-3.0](LICENSE). Código original de Igor Mundstein; modificações deste fork sob a mesma licença.
