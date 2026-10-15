@@ -19,6 +19,11 @@ namespace WinMemoryCleaner
 
             var executablePath = Environment.ProcessPath;
 
+            // O serviço roda como LocalSystem: se o exe estiver em pasta gravável por usuário comum, trocá-lo vira escalada de privilégio
+            if (!executablePath.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), StringComparison.OrdinalIgnoreCase) &&
+                !executablePath.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows), StringComparison.OrdinalIgnoreCase))
+                Logger.Warning("The service runs as LocalSystem from '" + executablePath + "'. Install the executable under Program Files so that standard users cannot replace it.");
+
             RunServiceControl("create", Constants.App.Name,
                 "binPath=", "\"" + executablePath + "\" /Service",
                 "start=", "delayed-auto",
@@ -51,11 +56,6 @@ namespace WinMemoryCleaner
         {
             if (!WinService.IsInstalled)
                 return;
-
-            // Processes that block service refresh/uninstallation
-            var processesToKill = new[] { "mmc", "procexp", "procexp64", "taskmgr" };
-
-            KillProcesses(Process.GetProcesses().Where(process => process is not null && processesToKill.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase)));
 
             try
             {

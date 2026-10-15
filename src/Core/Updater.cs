@@ -2,7 +2,9 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,26 +42,55 @@ namespace WinMemoryCleaner
                     return;
 
                 var exe = Path.GetFileName(App.Path);
-                var temp = Path.Combine(Path.GetTempPath(), exe);
 
-                Helper.DeleteFile(temp);
+                // Diretório exclusivo e imprevisível: evita que outro processo troque o arquivo entre a verificação e o move
+                var tempDirectory = Path.Combine(Path.GetTempPath(), "WinMemoryCleaner-" + Guid.NewGuid().ToString("N"));
+                var temp = Path.Combine(tempDirectory, exe);
 
-                using (var response = await _client.GetAsync(Constants.App.Repository.LatestExeUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+                Directory.CreateDirectory(tempDirectory);
+
+                try
                 {
-                    response.EnsureSuccessStatusCode();
+                    using (var response = await _client.GetAsync(Constants.App.Repository.LatestExeUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+                    {
+                        response.EnsureSuccessStatusCode();
 
-                    using (var source = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
-                    using (var destination = File.Create(temp))
-                        await source.CopyToAsync(destination, cancellationToken).ConfigureAwait(false);
+                        using (var source = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
+                        using (var destination = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                            await source.CopyToAsync(destination, cancellationToken).ConfigureAwait(false);
+                    }
+
+                    // Integridade: o SHA-256 do exe baixado deve bater com o checksums.txt publicado na mesma release (falha fechada)
+                    var checksums = await _client.GetStringAsync(Constants.App.Repository.ChecksumsUri, cancellationToken).ConfigureAwait(false);
+
+                    if (!TryGetExpectedHash(checksums, Constants.App.Repository.ExecutableName, out var expectedHash) || !string.Equals(ComputeSha256(temp), expectedHash, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Logger.Warning("Update discarded: downloaded executable does not match the published SHA-256 checksum");
+                        Helper.DeleteFile(temp);
+                        Directory.Delete(tempDirectory, true);
+
+                        return;
+                    }
+
+                    // Em single-file Assembly.GetName falha (BadImageFormat); a versão vem do recurso de versão do exe
+                    if (!Version.TryParse(FileVersionInfo.GetVersionInfo(temp).FileVersion, out var downloadedVersion) || !downloadedVersion.Equals(newestVersion))
+                    {
+                        Directory.Delete(tempDirectory, true);
+
+                        return;
+                    }
                 }
+                catch
+                {
+                    try { Directory.Delete(tempDirectory, true); } catch { /* ignored */ }
 
-                // Em single-file Assembly.GetName falha (BadImageFormat); a versão vem do recurso de versão do exe
-                if (!File.Exists(temp) || !Version.TryParse(FileVersionInfo.GetVersionInfo(temp).FileVersion, out var downloadedVersion) || !downloadedVersion.Equals(newestVersion))
-                    return;
+                    throw;
+                }
 
                 Process = new ProcessStartInfo
                 {
-                    Arguments = string.Format(CultureInfo.InvariantCulture, @"/c taskkill /f /im ""{0}"" & move /y ""{1}"" ""{2}"" & start """" ""{2}"" /{3} {4}", exe, temp, App.Path, newestVersion, string.Join(" ", args)),
+                    // net stop/start: libera o exe travado pelo serviço (se instalado) em vez de matá-lo sem parada ordenada
+                    Arguments = string.Format(CultureInfo.InvariantCulture, @"/c net stop ""{5}"" >nul 2>&1 & taskkill /f /im ""{0}"" >nul 2>&1 & move /y ""{1}"" ""{2}"" & rmdir ""{6}"" & net start ""{5}"" >nul 2>&1 & start """" ""{2}"" /{3} {4}", exe, temp, App.Path, newestVersion, BuildForwardedArguments(args), Constants.App.Name, tempDirectory),
                     CreateNoWindow = true,
                     FileName = "cmd",
                     RedirectStandardError = false,
@@ -81,6 +112,45 @@ namespace WinMemoryCleaner
 
                 Reset();
             }
+        }
+
+        /// <summary>
+        /// Calcula o SHA-256 (hex minúsculo) de um arquivo.
+        /// </summary>
+        private static string ComputeSha256(string path)
+        {
+            using (var stream = File.OpenRead(path))
+                return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Extrai de um checksums.txt (formato "hash  arquivo") o hash esperado para o arquivo informado.
+        /// </summary>
+        internal static bool TryGetExpectedHash(string checksums, string fileName, out string hash)
+        {
+            hash = null;
+
+            foreach (var line in (checksums ?? string.Empty).Split('\n'))
+            {
+                var parts = line.Trim().Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 2 && string.Equals(parts[1].TrimStart('*'), fileName, StringComparison.OrdinalIgnoreCase) && Regex.IsMatch(parts[0], "^[0-9a-fA-F]{64}$"))
+                {
+                    hash = parts[0];
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Mantém apenas argumentos simples (letras, números, ponto e barra inicial) para repassar ao cmd sem risco de injeção.
+        /// </summary>
+        internal static string BuildForwardedArguments(string[] args)
+        {
+            return string.Join(" ", (args ?? Array.Empty<string>()).Where(argument => Regex.IsMatch(argument ?? string.Empty, @"^/?[A-Za-z0-9._]+$")));
         }
 
         private static void Reset()
@@ -109,7 +179,8 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (Settings.AutoUpdate && DateTimeOffset.Now.Subtract(_lastCheck).TotalHours < Constants.App.AutoUpdateInterval)
+                // Respeita a opção do usuário (antes a condição estava invertida: com AutoUpdate desligado checava a cada chamada)
+                if (!Settings.AutoUpdate || DateTimeOffset.Now.Subtract(_lastCheck).TotalHours < Constants.App.AutoUpdateInterval)
                     return;
 
                 _lastCheck = DateTimeOffset.Now;

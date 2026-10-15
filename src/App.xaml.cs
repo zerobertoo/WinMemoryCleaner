@@ -403,9 +403,6 @@ namespace WinMemoryCleaner
 
                 if (commandLineArguments != null)
                 {
-                    // Update to the latest version
-                    Updater.Update(commandLineArguments);
-
                     // Process command‑line arguments
                     foreach (var argument in commandLineArguments.Select(arg => arg.Replace("/", string.Empty)))
                     {
@@ -436,6 +433,10 @@ namespace WinMemoryCleaner
                             _notifications.Add(string.Format(Localizer.Culture, Localizer.String.UpdatedToVersion, string.Format(Localizer.Culture, Constants.App.VersionFormat, Version.Major, Version.Minor, Version.Build)));
                     }
                 }
+
+                // Atualização automática só no modo GUI: nunca no serviço (LocalSystem), na instalação ou na execução silenciosa
+                if (startupType == Enums.StartupType.App && commandLineArguments != null)
+                    Updater.Update(commandLineArguments);
 
                 switch (startupType)
                 {
