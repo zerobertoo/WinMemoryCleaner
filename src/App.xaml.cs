@@ -234,7 +234,7 @@ namespace WinMemoryCleaner
                             try
                             {
                                 // XP/2003 need more stabilization time before reinitialization
-                                Thread.Sleep(Environment.OSVersion.Version.Major < 6 ? 10000 : 5000);
+                                Thread.Sleep(5000);
 
                                 // Retry logic for handling transient failures during system resume
                                 const int maxRetries = 3;

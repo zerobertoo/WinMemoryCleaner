@@ -14,11 +14,13 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateProgramFile>false</GenerateProgramFile>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>WinMemoryCleaner.snk</AssemblyOriginatorKeyFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <NoWarn>$(NoWarn);CA1416;IL3000</NoWarn>
     <TieredPGO>true</TieredPGO>
     <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
     <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
@@ -39,6 +41,8 @@
 
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" Condition="'$(PublishSingleFile)' != 'true'" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" Condition="'$(PublishSingleFile)' != 'true'" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.0" />
   </ItemGroup>
 

@@ -38,7 +38,7 @@ namespace WinMemoryCleaner
         public NotificationService(NotifyIcon notifyIcon)
         {
             _currentRotationAngle = 0;
-            _imageIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+            _imageIcon = Icon.ExtractAssociatedIcon(Environment.ProcessPath);
             _notifyIcon = notifyIcon;
 
             Initialize();

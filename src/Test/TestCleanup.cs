@@ -10,7 +10,7 @@ namespace WinMemoryCleaner.Test
     [SetUpFixture]
     public sealed class TestCleanup
     {
-        [TearDown]
+        [OneTimeTearDown]
         public void ResetSettingsAfterAllTests()
         {   
             Settings.Reset(true);
