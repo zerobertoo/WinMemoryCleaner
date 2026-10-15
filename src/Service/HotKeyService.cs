@@ -174,7 +174,8 @@ namespace WinMemoryCleaner
 
                 result = NativeMethods.RegisterHotKey(IntPtr.Zero, hotkey.GetHashCode(), (uint)hotkey.Modifiers, (uint)KeyInterop.VirtualKeyFromKey(hotkey.Key));
 
-                if (!_registered.ContainsKey(hotkey))
+                // Só guarda a ação se o registro no sistema teve sucesso
+                if (result && !_registered.ContainsKey(hotkey))
                     _registered.Add(hotkey, action);
             }
             catch

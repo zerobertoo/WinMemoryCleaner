@@ -64,10 +64,10 @@ namespace WinMemoryCleaner
                     {
                         Is64Bit = Environment.Is64BitOperatingSystem,
                         IsWindows7OrGreater = (operatingSystem.Version.Major > 6) || (operatingSystem.Version.Major == 6 && operatingSystem.Version.Minor >= 1),
-                        IsWindows8OrGreater = operatingSystem.Version.Major >= 6.2,
-                        IsWindows81OrGreater = operatingSystem.Version.Major >= 6.3,
+                        IsWindows8OrGreater = operatingSystem.Version >= new Version(6, 2),
+                        IsWindows81OrGreater = operatingSystem.Version >= new Version(6, 3),
                         IsWindowsVistaOrGreater = operatingSystem.Version.Major >= 6,
-                        IsWindowsXpOrGreater = operatingSystem.Version.Major >= 5.1
+                        IsWindowsXpOrGreater = operatingSystem.Version >= new Version(5, 1)
                     };
                 }
 
@@ -125,7 +125,8 @@ namespace WinMemoryCleaner
                 if (NativeMethods.LookupPrivilegeValue(null, privilegeName, ref newState.Luid))
                 {
                     // Enables or disables privileges in a specified access token
-                    result = NativeMethods.AdjustTokenPrivileges(current.Token, false, ref newState, 0, IntPtr.Zero, IntPtr.Zero);
+                    // AdjustTokenPrivileges retorna TRUE mesmo com ERROR_NOT_ALL_ASSIGNED (1300): o privilégio não foi concedido
+                    result = NativeMethods.AdjustTokenPrivileges(current.Token, false, ref newState, 0, IntPtr.Zero, IntPtr.Zero) && Marshal.GetLastWin32Error() != 1300;
                 }
 
                 if (!result)
@@ -148,6 +149,60 @@ namespace WinMemoryCleaner
         {
             if (areas == Enums.Memory.Areas.None)
                 return;
+
+            // Exclusão mútua entre processos (GUI, serviço e linha de comando): se outra otimização está em curso, esta é descartada
+            System.Threading.Mutex mutex = null;
+            var acquired = true;
+
+            try
+            {
+                mutex = new System.Threading.Mutex(false, @"Global\" + Constants.App.Id + ".Optimize");
+
+                try
+                {
+                    acquired = mutex.WaitOne(0);
+                }
+                catch (System.Threading.AbandonedMutexException)
+                {
+                    // o dono anterior terminou sem liberar; o mutex agora pertence a este processo
+                    acquired = true;
+                }
+            }
+            catch (Exception e)
+            {
+                // sem exclusão mútua disponível (ex.: acesso negado): segue sem ela
+                Logger.Debug(e.Message);
+                mutex?.Dispose();
+                mutex = null;
+            }
+
+            if (!acquired)
+            {
+                Logger.Information(Localizer.String.Optimize + ": another optimization is already running, skipped");
+                mutex.Dispose();
+
+                return;
+            }
+
+            try
+            {
+                OptimizeAreas(reason, areas);
+            }
+            finally
+            {
+                if (mutex is not null)
+                {
+                    mutex.ReleaseMutex();
+                    mutex.Dispose();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Executa a otimização de cada área, isolando falhas por área
+        /// </summary>
+        private void OptimizeAreas(Enums.Memory.Optimization.Reason reason, Enums.Memory.Areas areas)
+        {
 
             var errorRuntime = new TimeSpan();
             var infoRuntime = new TimeSpan();
@@ -269,7 +324,8 @@ namespace WinMemoryCleaner
             // Optimize Standby List
             if ((areas & (Enums.Memory.Areas.StandbyList | Enums.Memory.Areas.StandbyListLowPriority)) != 0)
             {
-                var lowPriority = (areas & Enums.Memory.Areas.StandbyListLowPriority) != 0;
+                // Com as duas áreas marcadas, o purge completo prevalece sobre o de baixa prioridade
+                var lowPriority = (areas & Enums.Memory.Areas.StandbyListLowPriority) != 0 && (areas & Enums.Memory.Areas.StandbyList) == 0;
                 var standbyList = lowPriority ? Localizer.String.StandbyListLowPriority : Localizer.String.StandbyList;
 
                 try
@@ -500,6 +556,9 @@ namespace WinMemoryCleaner
             if (!OperatingSystem.HasModifiedFileCache)
                 throw new Exception(string.Format(Localizer.Culture, Localizer.String.ErrorMemoryAreaOptimizationNotSupported, Localizer.String.ModifiedFileCache));
 
+            // Falha em um volume não impede os demais; os erros são agregados e lançados ao final
+            var volumeErrors = new StringBuilder();
+
             foreach (var drive in DriveInfo.GetDrives())
             {
                 if (drive is null || drive.DriveType != DriveType.Fixed || string.IsNullOrWhiteSpace(drive.Name))
@@ -508,7 +567,14 @@ namespace WinMemoryCleaner
                 using (var handle = OpenVolumeHandle(drive.Name))
                 {
                     if (handle is null || handle.IsInvalid)
+                    {
+                        if (volumeErrors.Length > 0)
+                            volumeErrors.Append(" | ");
+
+                        volumeErrors.Append(drive.Name).Append(": ").Append(new Win32Exception(Marshal.GetLastWin32Error()).Message);
+
                         continue;
+                    }
 
                     int bytesReturned;
 
@@ -568,9 +634,17 @@ namespace WinMemoryCleaner
                     }
 
                     if (!NativeMethods.FlushFileBuffers(handle))
-                        throw new Win32Exception(Marshal.GetLastWin32Error());
+                    {
+                        if (volumeErrors.Length > 0)
+                            volumeErrors.Append(" | ");
+
+                        volumeErrors.Append(drive.Name).Append(": ").Append(new Win32Exception(Marshal.GetLastWin32Error()).Message);
+                    }
                 }
             }
+
+            if (volumeErrors.Length > 0)
+                throw new Exception(volumeErrors.ToString());
         }
 
         /// <summary>
@@ -615,6 +689,9 @@ namespace WinMemoryCleaner
             // Windows minimum version
             if (!OperatingSystem.HasRegistryHive)
                 throw new Exception(string.Format(Localizer.Culture, Localizer.String.ErrorMemoryAreaOptimizationNotSupported, Localizer.String.RegistryCache));
+
+            // Best-effort: o privilégio pode já estar habilitado por outra área; o erro real vem do NTSTATUS abaixo
+            SetIncreasePrivilege(Constants.Windows.Privilege.SeProfSingleProcessName);
 
             if (NativeMethods.NtSetSystemInformation(Constants.Windows.SystemInformationClass.SystemRegistryReconciliationInformation, IntPtr.Zero, 0) != Constants.Windows.SystemErrorCode.ErrorSuccess)
                 throw new Win32Exception(Marshal.GetLastWin32Error());
@@ -751,7 +828,7 @@ namespace WinMemoryCleaner
             {
                 // Check privilege
                 if (!SetIncreasePrivilege(Constants.Windows.Privilege.SeProfSingleProcessName))
-                    throw new Exception(string.Format(Localizer.Culture, Localizer.String.ErrorAdminPrivilegeRequired, Constants.Windows.Privilege.SeDebugName));
+                    throw new Exception(string.Format(Localizer.Culture, Localizer.String.ErrorAdminPrivilegeRequired, Constants.Windows.Privilege.SeProfSingleProcessName));
 
                 var handle = GCHandle.Alloc(Constants.Windows.SystemMemoryListCommand.MemoryEmptyWorkingSets, GCHandleType.Pinned);
 

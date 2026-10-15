@@ -72,7 +72,24 @@ namespace WinMemoryCleaner
 
         [SuppressUnmanagedCodeSecurity]
         [DllImport("ntdll.dll", SetLastError = true)]
-        internal static extern int NtSetSystemInformation(int SystemInformationClass, IntPtr SystemInformation, uint SystemInformationLength);
+        private static extern int NtSetSystemInformationNative(int SystemInformationClass, IntPtr SystemInformation, uint SystemInformationLength);
+
+        [DllImport("ntdll.dll")]
+        private static extern int RtlNtStatusToDosError(int status);
+
+        /// <summary>
+        /// Chama NtSetSystemInformation e, em falha, converte o NTSTATUS retornado em código Win32
+        /// (as funções Nt* não definem o last-error), de modo que Marshal.GetLastWin32Error() reflita o erro real.
+        /// </summary>
+        internal static int NtSetSystemInformation(int SystemInformationClass, IntPtr SystemInformation, uint SystemInformationLength)
+        {
+            var status = NtSetSystemInformationNative(SystemInformationClass, SystemInformation, SystemInformationLength);
+
+            if (status != 0)
+                Marshal.SetLastPInvokeError(RtlNtStatusToDosError(status));
+
+            return status;
+        }
 
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

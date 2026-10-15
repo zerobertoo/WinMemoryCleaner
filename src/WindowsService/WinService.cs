@@ -15,6 +15,7 @@ namespace WinMemoryCleaner
         private DateTimeOffset _lastAutoOptimizationByInterval = DateTimeOffset.Now;
         private DateTimeOffset _lastAutoOptimizationByMemoryUsage = DateTimeOffset.Now;
         private readonly Timer _timer = new Timer(60000);
+        private int _isTickRunning;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WinService" /> class.
@@ -101,6 +102,12 @@ namespace WinMemoryCleaner
         protected override void OnStop()
         {
             _timer.Stop();
+
+            // Aguarda (até 30 s) a otimização em curso terminar antes de encerrar o serviço
+            var deadline = DateTime.UtcNow.AddSeconds(30);
+
+            while (System.Threading.Volatile.Read(ref _isTickRunning) != 0 && DateTime.UtcNow < deadline)
+                System.Threading.Thread.Sleep(100);
         }
 
         /// <summary>
@@ -109,6 +116,27 @@ namespace WinMemoryCleaner
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void OnTimer(object sender, ElapsedEventArgs e)
+        {
+            // Evita ticks sobrepostos (a otimização pode demorar mais que o intervalo do timer)
+            if (System.Threading.Interlocked.CompareExchange(ref _isTickRunning, 1, 0) != 0)
+                return;
+
+            try
+            {
+                RunTimerTick();
+            }
+            catch (Exception exception)
+            {
+                // exceção não tratada em Elapsed derrubaria o serviço
+                Logger.Error(exception);
+            }
+            finally
+            {
+                System.Threading.Interlocked.Exchange(ref _isTickRunning, 0);
+            }
+        }
+
+        private void RunTimerTick()
         {
             // App priority
             App.SetPriority(Settings.RunOnPriority);

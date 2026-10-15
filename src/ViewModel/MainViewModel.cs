@@ -29,6 +29,9 @@ namespace WinMemoryCleaner
         private DateTimeOffset _lastAutoOptimizationByInterval = DateTimeOffset.Now;
         private DateTimeOffset _lastAutoOptimizationByMemoryUsage = DateTimeOffset.Now;
         private readonly object _lockObject = new object();
+
+        // 1 enquanto há uma otimização enfileirada ou em execução (check-then-act atômico entre gatilhos)
+        private int _optimizationQueued;
         private byte _optimizationProgressPercentage;
         private string _optimizationProgressStep = Localizer.String.Optimize;
         private byte _optimizationProgressTotal = byte.MaxValue;
@@ -1761,8 +1764,10 @@ namespace WinMemoryCleaner
                     App.SetPriority(Settings.RunOnPriority);
 
                     // Memory optimize
-                    var tempPhysicalAvailable = Computer.Memory.Physical.Free.Bytes;
-                    var tempVirtualAvailable = Computer.Memory.Virtual.Free.Bytes;
+                    // Leitura fresca: o valor em cache pode estar defasado
+                    var memoryBefore = _computerService.Memory;
+                    var tempPhysicalAvailable = memoryBefore.Physical.Free.Bytes;
+                    var tempVirtualAvailable = memoryBefore.Virtual.Free.Bytes;
 
                     _computerService.Optimize(reason, Settings.MemoryAreas);
 
@@ -1773,8 +1778,9 @@ namespace WinMemoryCleaner
                     // Notification
                     if (Settings.ShowOptimizationNotifications)
                     {
-                        var physicalReleased = (Computer.Memory.Physical.Free.Bytes > tempPhysicalAvailable ? Computer.Memory.Physical.Free.Bytes - tempPhysicalAvailable : tempPhysicalAvailable - Computer.Memory.Physical.Free.Bytes).ToMemoryUnit();
-                        var virtualReleased = (Computer.Memory.Virtual.Free.Bytes > tempVirtualAvailable ? Computer.Memory.Virtual.Free.Bytes - tempVirtualAvailable : tempVirtualAvailable - Computer.Memory.Virtual.Free.Bytes).ToMemoryUnit();
+                        // Se a memória livre diminuiu (outro processo alocou), nada foi liberado: não exibe o módulo da diferença
+                        var physicalReleased = (Computer.Memory.Physical.Free.Bytes > tempPhysicalAvailable ? Computer.Memory.Physical.Free.Bytes - tempPhysicalAvailable : 0).ToMemoryUnit();
+                        var virtualReleased = (Computer.Memory.Virtual.Free.Bytes > tempVirtualAvailable ? Computer.Memory.Virtual.Free.Bytes - tempVirtualAvailable : 0).ToMemoryUnit();
 
                         var message = Settings.ShowVirtualMemory
                             ? string.Format(Localizer.Culture, "{1}{0}{0}{2}: {3}{0}{4}: {5:0.#} {6}{0}{7}: {8:0.#} {9}", Environment.NewLine, Localizer.String.MemoryOptimized.ToUpper(Localizer.Culture), Localizer.String.Reason, reason.GetString(), Localizer.String.PhysicalMemory, physicalReleased.Key, physicalReleased.Value, Localizer.String.VirtualMemory, virtualReleased.Key, virtualReleased.Value)
@@ -1783,8 +1789,15 @@ namespace WinMemoryCleaner
                         Notify(message);
                     }
                 }
+                catch (Exception e)
+                {
+                    // exceção em thread do pool derrubaria o processo
+                    Logger.Error(e);
+                }
                 finally
                 {
+                    Interlocked.Exchange(ref _optimizationQueued, 0);
+
                     IsOptimizationRunning = false;
                     IsBusy = false;
 
@@ -1792,7 +1805,7 @@ namespace WinMemoryCleaner
 
                     // Raise the event after IsOptimizationRunning is set to false
                     // Use BeginInvoke to ensure it runs after all property changes propagate
-                    WpfApplication.Current.Dispatcher.BeginInvoke((Action)(() =>
+                    WpfApplication.Current?.Dispatcher.BeginInvoke((Action)(() =>
                     {
                         // Force command manager to re-evaluate CanExecute on all commands
                         CommandManager.InvalidateRequerySuggested();
@@ -1801,7 +1814,7 @@ namespace WinMemoryCleaner
                     // Raise completion event with lower priority to ensure commands are refreshed first
                     if (OnOptimizeCommandCompleted != null)
                     {
-                        WpfApplication.Current.Dispatcher.BeginInvoke((Action)(() =>
+                        WpfApplication.Current?.Dispatcher.BeginInvoke((Action)(() =>
                          {
                              OnOptimizeCommandCompleted();
                          }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
@@ -1818,7 +1831,7 @@ namespace WinMemoryCleaner
         {
             try
             {
-                if (IsOptimizationRunning)
+                if (IsOptimizationRunning || Interlocked.CompareExchange(ref _optimizationQueued, 1, 0) != 0)
                     return;
 
                 OptimizationProgressStep = Localizer.String.Optimize;
@@ -1829,6 +1842,7 @@ namespace WinMemoryCleaner
             }
             catch (Exception e)
             {
+                Interlocked.Exchange(ref _optimizationQueued, 0);
                 Logger.Error(e);
             }
         }
@@ -1876,8 +1890,10 @@ namespace WinMemoryCleaner
                 {
                     _isReiniziliating = true;
 
+                    // RegisterHotKey(IntPtr.Zero) associa o atalho à thread chamadora: precisa ser a thread da UI (com message pump).
+                    // BeginInvoke (assíncrono) evita deadlock com o lock mantido aqui
                     if (UseHotkey)
-                        RegisterOptimizationHotkey(Settings.OptimizationModifiers, Settings.OptimizationKey);
+                        WpfApplication.Current?.Dispatcher.BeginInvoke((Action)(() => RegisterOptimizationHotkey(Settings.OptimizationModifiers, Settings.OptimizationKey)));
 
                     Computer.Memory = _computerService.Memory;
 
