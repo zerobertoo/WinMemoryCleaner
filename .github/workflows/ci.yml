@@ -123,37 +123,12 @@ jobs:
           path: src\bin\Release\WinMemoryCleaner.exe
           if-no-files-found: error
 
-      - name: Submit to SignPath (Develop CI Signing)
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || steps.check_files.outputs.any_changed == 'true') && (github.repository == 'IgorMundstein/WinMemoryCleaner' && github.ref == 'refs/heads/develop')
-        id: signpath
-        uses: signpath/github-action-submit-signing-request@v1.1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: WinMemoryCleaner
-          signing-policy-slug: ci-signing
-          github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: ./
-
-      - name: Upload signed build artifact
-        if: steps.signpath.conclusion == 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: winmemorycleaner-${{ steps.version.outputs.app_version }}-signed
-          path: WinMemoryCleaner.exe
-          retention-days: 30
-
       - name: Determine Test Artifact
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || steps.check_files.outputs.any_changed == 'true'
         id: determine_artifact
         shell: pwsh
         run: |
-          if ('${{ steps.signpath.conclusion }}' -eq 'success') {
-            echo "name=winmemorycleaner-${{ steps.version.outputs.app_version }}-signed" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          } else {
-            echo "name=winmemorycleaner-${{ steps.version.outputs.app_version }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          }
+          echo "name=winmemorycleaner-${{ steps.version.outputs.app_version }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
   test-ui:
     name: UI Test on ${{ matrix.os }}
