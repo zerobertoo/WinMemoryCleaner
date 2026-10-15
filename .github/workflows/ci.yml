@@ -42,11 +42,11 @@ jobs:
 
       - name: Checkout code
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || steps.check_files.outputs.any_changed == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Cache NuGet packages
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || steps.check_files.outputs.any_changed == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
           key: nuget-${{ hashFiles('**/*.csproj') }}
@@ -55,7 +55,7 @@ jobs:
 
       - name: Setup .NET
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || steps.check_files.outputs.any_changed == 'true'
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
@@ -71,7 +71,7 @@ jobs:
 
       - name: Upload test results
         if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || steps.check_files.outputs.any_changed == 'true')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-results-${{ github.run_number }}
           path: TestResults.trx
@@ -113,7 +113,7 @@ jobs:
       - name: Upload unsigned EXE as artifact
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || steps.check_files.outputs.any_changed == 'true'
         id: upload-unsigned
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: winmemorycleaner-${{ steps.version.outputs.app_version }}
           path: publish/WinMemoryCleaner.exe
@@ -138,7 +138,7 @@ jobs:
 
     steps:
       - name: Download build artifact for testing
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.build-and-test.outputs.test_artifact_name }}
 
@@ -176,7 +176,7 @@ jobs:
 
       - name: Upload Screenshot Artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ui-test-screenshot-${{ matrix.os }}
           path: screenshot-${{ matrix.os }}.png
@@ -190,7 +190,7 @@ jobs:
 
     steps:
       - name: Download all screenshot artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: ui-test-screenshot-*
           path: ./all-screenshots
@@ -201,7 +201,7 @@ jobs:
 
       - name: Upload final screenshot package
         id: upload-screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: all-screenshots-${{ needs.build-and-test.outputs.app_version }}
           path: ./all-screenshots/
