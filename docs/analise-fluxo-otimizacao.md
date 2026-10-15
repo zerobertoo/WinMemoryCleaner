@@ -244,3 +244,30 @@ Impacto (I), esforço (E), risco (R): B/M/A. "Test." = testável sem admin.
 6. **Standby + LowPriority ligados:** executar ambos (purge completo) ou manter só o low priority?
 7. **Escopo de features** da seção 6.2: quais entram (sugestão: F-02, F-06, F-03).
 8. **Abstração da camada nativa (T-09):** aceitar o custo de refactor para destravar testes?
+
+## 9. Decisões tomadas e status de implementação
+
+Decisões (delegadas pelo dono do projeto) e o que foi implementado nos commits `1432aa8` e `612b50b`. Build com 0 warnings e 350 testes verdes (340 anteriores + 10 novos).
+
+| # | Decisão | Status |
+|---|---|---|
+| 1 | Bloquear otimização concorrente: mutex global `Global\<AppId>.Optimize` em `ComputerService.Optimize` (vale para GUI, serviço e CLI; falha aberta se o mutex não puder ser criado) + guard atômico `Interlocked` em `OptimizeAsync` | feito (A-07, A-09) |
+| 2 | Updater: SHA-256 conferido contra o `checksums.txt` já publicado na release (falha fechada, sem mudar o CI); diretório temporário exclusivo; argumentos sanitizados; `net stop/start` do serviço em vez de matar sem parada; update só no modo GUI; condição de `AutoUpdate` corrigida (estava invertida) | feito (A-01..A-03, M-11) |
+| 3 | `/Install` apenas avisa (log) quando o exe está fora de `Program Files`/`Windows` | feito (M-10) |
+| 4 | Removidos os kills de `mmc/procexp/procexp64/taskmgr` no uninstall; o kill de outras instâncias do próprio exe no `/Reset` foi mantido (necessário) | feito (M-13, parcial) |
+| 5 | "Liberado" nunca negativo: delta com clamp em zero e baseline com leitura fresca | feito (A-04) |
+| 6 | Standby + LowPriority ligados: executa o purge completo | feito (M-04) |
+| 7 | Features da seção 6.2 | adiadas (nenhuma implementada) |
+| 8 | Abstração completa da camada nativa | adiada; só extração de funções puras onde barato (`TryGetExpectedHash`, `BuildForwardedArguments`) |
+
+### Itens corrigidos
+
+A-01, A-02, A-03, A-04, A-05 (NTSTATUS convertido via `RtlNtStatusToDosError` em um wrapper, sem tocar nos call sites), A-06 (registro do hotkey despachado à thread da UI + `_registered` só guarda registro bem-sucedido), A-07, A-08 (`catch` + `?.` em `Optimize`), A-09 (try/catch, anti-reentrância e `OnStop` aguardando), M-01 (erro 1300), M-02 (privilégio no RegistryCache), M-03 (volumes: falha em um não aborta os demais, erros agregados), M-04, M-11, B-04 (comparação de versão), B-05 (mensagem do privilégio).
+
+### Pendente / não alterado
+
+- **A-10** (deadlock potencial no tray), **M-06** (`IsBusy` compartilhado), **M-07** (lista de exclusão sem sincronização), **M-08** (aviso ao usuário de falha parcial), **M-09** (NotifyIcon fora da UI): exigem mexer no `NotificationService` e no modelo de `IsBusy`; sem como validar sem rodar a UI com admin.
+- **M-05** (tamanho das structs): não alterado. Com `Pack = 1`, trocar `Flags` para `uint` reduziria `MemoryCombineInformationEx` a 20 bytes e quebraria o x64 que hoje coincide com os 24 nativos; o tamanho de `SystemFileCacheInformation64` precisa ser validado contra o WDK em máquina real.
+- **M-12, M-14, M-15, M-16** e a maioria dos baixos.
+- **Efeito colateral do `net start`:** se o serviço estava instalado mas parado de propósito, o update o inicia.
+- Funções puras para `ParseArgs`/`ShouldOptimize` (seção 5, itens 1-2) e features F-xx seguem como roadmap.
