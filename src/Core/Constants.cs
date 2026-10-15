@@ -51,11 +51,6 @@ namespace WinMemoryCleaner
                 public const string Uninstall = "Uninstall";
             }
 
-            public static class Defaults
-            {
-                public static readonly string Path = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            }
-
             public static class Donation
             {
                 public static readonly Uri BitcoinUri = new Uri("https://www.blockchain.com/explorer/addresses/btc/bc1qu884q5r2uqugvdhyk8l6waakumeve7jykqp7ap");
