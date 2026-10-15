@@ -15,7 +15,7 @@ namespace WinMemoryCleaner
         private string _about, _add, _alwaysOnTop, _autoOptimization, _autoOptimizationInterval, _autoUpdate;
         private string _background;
         private string _close, _closeAfterOptimization, _closeToTheNotificationArea, _collapse, _combinedPageList, _createStartMenuShortcut;
-        private string _dangerLevel, _donate, _donationMessage, _donationTitle;
+        private string _dangerLevel;
         private string _error, _errorAdminPrivilegeRequired, _errorCanNotSaveLog, _errorMemoryAreaOptimizationNotSupported, _errorResetCommand, _everyHour, _exit, _expand;
         private string _free;
         private string _garbageCollector;
@@ -134,27 +134,6 @@ namespace WinMemoryCleaner
         {
             get { return _dangerLevel; }
             private set { _dangerLevel = value.Capitalize(); }
-        }
-
-        [DataMember]
-        public string Donate
-        {
-            get { return _donate; }
-            private set { _donate = value.Capitalize(); }
-        }
-
-        [DataMember]
-        public string DonationMessage
-        {
-            get { return _donationMessage; }
-            private set { _donationMessage = value.Capitalize(); }
-        }
-
-        [DataMember]
-        public string DonationTitle
-        {
-            get { return _donationTitle; }
-            private set { _donationTitle = value.Capitalize(); }
         }
 
         [DataMember]

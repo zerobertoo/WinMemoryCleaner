@@ -60,34 +60,6 @@ namespace WinMemoryCleaner.Test
             }
 
             [Test]
-            public void App_Donation_BitcoinUri_IsValid()
-            {
-                Assert.IsNotNull(Constants.App.Donation.BitcoinUri);
-                Assert.IsTrue(Constants.App.Donation.BitcoinUri.IsAbsoluteUri);
-            }
-
-            [Test]
-            public void App_Donation_EthereumUri_IsValid()
-            {
-                Assert.IsNotNull(Constants.App.Donation.EthereumUri);
-                Assert.IsTrue(Constants.App.Donation.EthereumUri.IsAbsoluteUri);
-            }
-
-            [Test]
-            public void App_Donation_GitHubSponsorUri_IsValid()
-            {
-                Assert.IsNotNull(Constants.App.Donation.GitHubSponsorUri);
-                Assert.IsTrue(Constants.App.Donation.GitHubSponsorUri.IsAbsoluteUri);
-            }
-
-            [Test]
-            public void App_Donation_KofiUri_IsValid()
-            {
-                Assert.IsNotNull(Constants.App.Donation.KofiUri);
-                Assert.IsTrue(Constants.App.Donation.KofiUri.IsAbsoluteUri);
-            }
-
-            [Test]
             public void App_Id_IsValidGuid()
             {
                 var guid = Guid.Parse(Constants.App.Id);

@@ -746,46 +746,6 @@ namespace WinMemoryCleaner.Test
 
         #endregion
 
-        #region DonationViewModel Tests
-
-
-        public sealed class DonationViewModelTests : IDisposable
-        {
-            private INotificationService _notificationService;
-            private DonationViewModel _viewModel;
-
-            public DonationViewModelTests()
-            {
-                SetUp();
-            }
-
-            public void SetUp()
-            {
-                _notificationService = new NotificationService(new NotifyIcon());
-                _viewModel = new DonationViewModel(_notificationService);
-            }
-
-            public void Dispose()
-            {
-                _viewModel = null;
-
-                if (_notificationService != null)
-                {
-                    _notificationService.Dispose();
-                    _notificationService = null;
-                }
-
-                GC.SuppressFinalize(this);
-            }
-
-            [Test]
-            public void Constructor_InitializesViewModel()
-            {
-                Assert.IsNotNull(_viewModel);
-            }
-        }
-
-        #endregion
     }
 }
 

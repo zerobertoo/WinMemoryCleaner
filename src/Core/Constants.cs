@@ -30,33 +30,12 @@ namespace WinMemoryCleaner
                 public const string Name = "Igor Mundstein";
             }
 
-            public static class Certificate
-            {
-                public static class Release
-                {
-                    public const string Thumbprint = "9D201FB199626ABE7DA32FBE47013FC023670F9B";
-                }
-
-                public static class Test
-                {
-                    public const string Thumbprint = "2187092935C12F90727B29AD6913A7F89817B942";
-                }
-            }
-
             public static class CommandLineArgument
             {
                 public const string Install = "Install";
                 public const string Reset = "Reset";
                 public const string Service = "Service";
                 public const string Uninstall = "Uninstall";
-            }
-
-            public static class Donation
-            {
-                public static readonly Uri BitcoinUri = new Uri("https://www.blockchain.com/explorer/addresses/btc/bc1qu884q5r2uqugvdhyk8l6waakumeve7jykqp7ap");
-                public static readonly Uri EthereumUri = new Uri("https://www.blockchain.com/explorer/addresses/eth/0xb71A94733B0578D155D9A765E0d2C4dA0f44156d");
-                public static readonly Uri GitHubSponsorUri = new Uri("https://github.com/sponsors/IgorMundstein");
-                public static readonly Uri KofiUri = new Uri("https://ko-fi.com/igormundstein");
             }
 
             public static class Registry
