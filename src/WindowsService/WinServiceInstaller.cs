@@ -55,7 +55,7 @@ namespace WinMemoryCleaner
             // Processes that block service refresh/uninstallation
             var processesToKill = new[] { "mmc", "procexp", "procexp64", "taskmgr" };
 
-            KillProcesses(Process.GetProcesses().Where(process => process != null && processesToKill.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase)));
+            KillProcesses(Process.GetProcesses().Where(process => process is not null && processesToKill.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase)));
 
             try
             {

@@ -29,7 +29,7 @@ namespace WinMemoryCleaner
         /// <param name="propertyName">Name of the property.</param>
         public void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
+            if (PropertyChanged is not null)
                 PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -44,15 +44,15 @@ namespace WinMemoryCleaner
         {
             var handler = PropertyChanged;
 
-            if (handler != null && expression != null)
+            if (handler is not null && expression is not null)
             {
                 var body = expression.Body as MemberExpression;
 
-                if (body != null)
+                if (body is not null)
                 {
                     var property = body.Member as PropertyInfo;
 
-                    if (property != null)
+                    if (property is not null)
                     {
                         var propertyName = property.Name;
 

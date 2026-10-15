@@ -49,7 +49,7 @@ namespace WinMemoryCleaner
         /// </summary>
         public void Initialize()
         {
-            if (_notifyIcon == null)
+            if (_notifyIcon is null)
                 return;
 
             // Notification Areas (Menu)
@@ -108,7 +108,7 @@ namespace WinMemoryCleaner
 
                 try
                 {
-                    if (_rotationTimer != null)
+                    if (_rotationTimer is not null)
                     {
                         _rotationTimer.Stop();
                         _rotationTimer.Tick -= OnRotationTimerTick;
@@ -122,7 +122,7 @@ namespace WinMemoryCleaner
 
                 try
                 {
-                    if (_notifyIcon != null)
+                    if (_notifyIcon is not null)
                     {
                         _notifyIcon.Visible = false;
                         _notifyIcon.Icon = null;
@@ -135,7 +135,7 @@ namespace WinMemoryCleaner
 
                 try
                 {
-                    if (_currentIcon != null && _currentIcon != _imageIcon)
+                    if (_currentIcon is not null && _currentIcon != _imageIcon)
                     {
                         _currentIcon.Dispose();
                         _currentIcon = null;
@@ -148,7 +148,7 @@ namespace WinMemoryCleaner
 
                 try
                 {
-                    if (_imageIcon != null)
+                    if (_imageIcon is not null)
                         _imageIcon.Dispose();
                 }
                 catch (Exception ex)
@@ -158,7 +158,7 @@ namespace WinMemoryCleaner
 
                 try
                 {
-                    if (_notifyIcon != null)
+                    if (_notifyIcon is not null)
                         _notifyIcon.Dispose();
                 }
                 catch (Exception ex)
@@ -181,7 +181,7 @@ namespace WinMemoryCleaner
             {
                 _currentRotationAngle = 0;
 
-                if (_rotationTimer != null)
+                if (_rotationTimer is not null)
                 {
                     _rotationTimer.Stop();
                     _rotationTimer.Tick -= OnRotationTimerTick;
@@ -352,7 +352,7 @@ namespace WinMemoryCleaner
         /// <returns>A new icon rotated by the specified angle</returns>
         private Icon GetRotatedIcon(Icon icon, float angle)
         {
-            if (icon == null || angle == 0)
+            if (icon is null || angle == 0)
                 return icon;
 
             try
@@ -476,7 +476,7 @@ namespace WinMemoryCleaner
         /// <param name="running">if set to <c>true</c> shows loading cursor and disables menu</param>
         public void Loading(bool running)
         {
-            if (WpfApplication.Current == null || WpfApplication.Current.Dispatcher == null)
+            if (WpfApplication.Current is null || WpfApplication.Current.Dispatcher is null)
                 return;
 
             // Multi-threading trick
@@ -484,7 +484,7 @@ namespace WinMemoryCleaner
             {
                 Mouse.OverrideCursor = running ? Cursors.Wait : null;
 
-                if (_notifyIcon.ContextMenuStrip != null)
+                if (_notifyIcon.ContextMenuStrip is not null)
                     _notifyIcon.ContextMenuStrip.Enabled = !running;
             });
         }
@@ -498,7 +498,7 @@ namespace WinMemoryCleaner
         /// <param name="icon">The notification icon type</param>
         public void Notify(string message, string title = null, int timeout = 5, Enums.Icon.Notification icon = Enums.Icon.Notification.None)
         {
-            if (_notifyIcon == null)
+            if (_notifyIcon is null)
                 return;
 
             try
@@ -536,7 +536,7 @@ namespace WinMemoryCleaner
                     _notifyIcon.Icon = newIcon;
                     _currentIcon = newIcon;
 
-                    if (oldIcon != null && oldIcon != _imageIcon && oldIcon != newIcon)
+                    if (oldIcon is not null && oldIcon != _imageIcon && oldIcon != newIcon)
                     {
                         try
                         {
@@ -564,10 +564,10 @@ namespace WinMemoryCleaner
         /// </summary>
         private void StartRotationAnimation()
         {
-            if (_rotationTimer != null)
+            if (_rotationTimer is not null)
                 return;
 
-            if (WpfApplication.Current == null || WpfApplication.Current.Dispatcher == null)
+            if (WpfApplication.Current is null || WpfApplication.Current.Dispatcher is null)
                 return;
 
             try
@@ -599,12 +599,12 @@ namespace WinMemoryCleaner
         /// </summary>
         private void StopRotationAnimation()
         {
-            if (_rotationTimer == null)
+            if (_rotationTimer is null)
                 return;
 
             try
             {
-                if (WpfApplication.Current == null || WpfApplication.Current.Dispatcher == null)
+                if (WpfApplication.Current is null || WpfApplication.Current.Dispatcher is null)
                 {
                     CleanupRotationTimer();
                     return;
@@ -629,12 +629,12 @@ namespace WinMemoryCleaner
         /// <exception cref="ArgumentNullException">memory</exception>
         public void Update(Memory memory, bool isOptimizing = false)
         {
-            if (memory == null)
+            if (memory is null)
                 throw new ArgumentNullException("memory");
 
             lock (_disposeLock)
             {
-                if (_disposed || _notifyIcon == null)
+                if (_disposed || _notifyIcon is null)
                     return;
 
                 try
@@ -647,7 +647,7 @@ namespace WinMemoryCleaner
                     _notifyIcon.Icon = newIcon;
                     _currentIcon = newIcon;
 
-                    if (oldIcon != null && oldIcon != _imageIcon && oldIcon != newIcon)
+                    if (oldIcon is not null && oldIcon != _imageIcon && oldIcon != newIcon)
                     {
                         try
                         {

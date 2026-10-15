@@ -69,7 +69,7 @@ namespace WinMemoryCleaner
         /// </returns>
         public override string ToString()
         {
-            return string.Format(Localizer.Culture, "{0} ({1}) - {2} area(s)", Reason, Duration, MemoryAreas != null ? MemoryAreas.Count : 0);
+            return string.Format(Localizer.Culture, "{0} ({1}) - {2} area(s)", Reason, Duration, MemoryAreas is not null ? MemoryAreas.Count : 0);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace WinMemoryCleaner
         /// <param name="memoryStatusEx">The memory status ex.</param>
         public Memory(Structs.Windows.MemoryStatusEx memoryStatusEx)
         {
-            if (memoryStatusEx == null)
+            if (memoryStatusEx is null)
                 throw new ArgumentNullException("memoryStatusEx");
 
             Physical = new MemoryStats(memoryStatusEx.AvailPhys, memoryStatusEx.TotalPhys, memoryStatusEx.MemoryLoad);

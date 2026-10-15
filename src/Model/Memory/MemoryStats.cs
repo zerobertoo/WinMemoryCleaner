@@ -17,7 +17,7 @@
             Total = new MemorySize(total);
             Used = new MemorySize(total >= free ? total - free : free - total);
 
-            if (used == null)
+            if (used is null)
                 used = Used.Value > 0 && Total.Value > 0 ? (int)(Used.Value * 100 / Total.Value) : 0;
 
             Free.Percentage = (int)(100 - used);

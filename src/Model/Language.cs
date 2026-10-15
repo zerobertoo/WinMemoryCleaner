@@ -16,7 +16,7 @@ namespace WinMemoryCleaner
         /// <exception cref="ArgumentNullException">culture</exception>
         public Language(CultureInfo culture)
         {
-            if (culture == null)
+            if (culture is null)
                 throw new ArgumentNullException("culture");
 
             Direction = culture.TextInfo.IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
@@ -153,7 +153,7 @@ namespace WinMemoryCleaner
         /// </returns>
         public override int GetHashCode()
         {
-            return Name != null ? Name.GetHashCode() : 0;
+            return Name is not null ? Name.GetHashCode() : 0;
         }
 
         /// <summary>
