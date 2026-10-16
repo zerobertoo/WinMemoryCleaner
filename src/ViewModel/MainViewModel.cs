@@ -765,7 +765,12 @@ namespace WinMemoryCleaner
             set
             {
                 if (value == OptimizationProfile.Kind.Custom)
+                {
+                    // "Personalizado" não muda as áreas: devolve ao seletor o perfil real
+                    RaisePropertyChanged();
+
                     return;
+                }
 
                 try
                 {
