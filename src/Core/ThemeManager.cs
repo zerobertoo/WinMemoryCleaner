@@ -192,16 +192,18 @@ namespace WinMemoryCleaner
 
                 var defaultResources = new Dictionary<string, WpfColor>
                 {
-                    { "Accent", WpfColor.FromArgb(0xFF, 0x00, 0xAE, 0xF7) },
-                    { "MemoryBarIndicatorBackground", WpfColor.FromArgb(0xFF, 0xE0, 0x36, 0x0A) },
-                    { "MemoryBarTrackBackground", WpfColor.FromArgb(0xFF, 0x00, 0xAA, 0x41) },
-                    { "PrimaryBackground", WpfColor.FromArgb(0xFF, 0x20, 0x20, 0x20) },
-                    { "PrimaryBorder", WpfColor.FromArgb(0xFF, 0x30, 0x30, 0x30) },
-                    { "SecondaryBackground", WpfColor.FromArgb(0xFF, 0x2C, 0x2C, 0x2C) },
-                    { "SecondaryBorder", WpfColor.FromArgb(0xFF, 0x70, 0x70, 0x70) },
-                    { "SecondaryDisabled", WpfColor.FromArgb(0xFF, 0x99, 0x99, 0x99) },
-                    { "SecondaryForeground", WpfColor.FromArgb(0xFF, 0xFF, 0xFF, 0xFF) }
+                    { "Accent", WpfColor.FromArgb(0xFF, 0xFF, 0x3B, 0x30) },
+                    { "MemoryBarIndicatorBackground", WpfColor.FromArgb(0xFF, 0xF4, 0xF2, 0xEE) },
+                    { "MemoryBarTrackBackground", WpfColor.FromArgb(0xFF, 0x3A, 0x3A, 0x38) },
+                    { "PrimaryBackground", WpfColor.FromArgb(0xFF, 0x14, 0x14, 0x14) },
+                    { "PrimaryBorder", WpfColor.FromArgb(0xFF, 0x4A, 0x4A, 0x47) },
+                    { "SecondaryBackground", WpfColor.FromArgb(0xFF, 0x1E, 0x1E, 0x1D) },
+                    { "SecondaryBorder", WpfColor.FromArgb(0xFF, 0x8A, 0x8A, 0x85) },
+                    { "SecondaryDisabled", WpfColor.FromArgb(0xFF, 0x9A, 0x9A, 0x94) },
+                    { "SecondaryForeground", WpfColor.FromArgb(0xFF, 0xF4, 0xF2, 0xEE) }
                 };
+
+                ApplyFluentTheme(Enums.Theme.Dark);
 
                 foreach (var kvp in defaultResources)
                 {
@@ -710,6 +712,61 @@ namespace WinMemoryCleaner
             catch (Exception e)
             {
                 Logger.Error("Failed to apply theme " + theme + ": " + e.Message);
+            }
+
+            ApplyFluentTheme(theme);
+        }
+
+        /// <summary>
+        /// Applies the WPF-UI (Fluent) theme and the signal-red accent that matches the selected theme.
+        /// </summary>
+        /// <param name="theme">The theme.</param>
+        private static void ApplyFluentTheme(Enums.Theme theme)
+        {
+            try
+            {
+                var fluentTheme = theme == Enums.Theme.Dark ? Wpf.Ui.Appearance.ApplicationTheme.Dark : Wpf.Ui.Appearance.ApplicationTheme.Light;
+                var accent = theme == Enums.Theme.Dark ? WpfColor.FromRgb(0xFF, 0x3B, 0x30) : WpfColor.FromRgb(0xE3, 0x06, 0x13);
+
+                Wpf.Ui.Appearance.ApplicationThemeManager.Apply(fluentTheme, Wpf.Ui.Controls.WindowBackdropType.Mica, false);
+                Wpf.Ui.Appearance.ApplicationAccentColorManager.Apply(accent, fluentTheme, false);
+
+                // o WPF-UI clareia o destaque no tema escuro; fixa o vermelho de sinal nos estados do botão primário e dos controles marcados
+                var isDark = theme == Enums.Theme.Dark;
+                var states = new Dictionary<string, WpfColor>
+                {
+                    { "AccentFillColorDefaultBrush", accent },
+                    { "AccentFillColorSecondaryBrush", isDark ? WpfColor.FromRgb(0xE6, 0x35, 0x2B) : WpfColor.FromRgb(0xC9, 0x05, 0x0F) },
+                    { "AccentFillColorTertiaryBrush", isDark ? WpfColor.FromRgb(0xCC, 0x2F, 0x26) : WpfColor.FromRgb(0xAF, 0x04, 0x0D) },
+                    { "TextOnAccentFillColorPrimaryBrush", WpfColor.FromRgb(0xFF, 0xFF, 0xFF) },
+                    { "AccentButtonBackground", accent },
+                    { "AccentButtonBackgroundPointerOver", isDark ? WpfColor.FromRgb(0xE6, 0x35, 0x2B) : WpfColor.FromRgb(0xC9, 0x05, 0x0F) },
+                    { "AccentButtonBackgroundPressed", isDark ? WpfColor.FromRgb(0xCC, 0x2F, 0x26) : WpfColor.FromRgb(0xAF, 0x04, 0x0D) },
+                    { "AccentButtonForeground", WpfColor.FromRgb(0xFF, 0xFF, 0xFF) },
+                    { "AccentButtonForegroundPointerOver", WpfColor.FromRgb(0xFF, 0xFF, 0xFF) },
+                    { "AccentButtonForegroundPressed", WpfColor.FromRgb(0xFF, 0xFF, 0xFF) },
+                    { "SystemAccentColorPrimaryBrush", accent },
+                    { "SystemAccentColorSecondaryBrush", accent },
+                    { "SystemAccentColorTertiaryBrush", accent },
+                    { "CheckBoxCheckBackgroundFillChecked", accent },
+                    { "CheckBoxCheckBackgroundFillCheckedPointerOver", accent },
+                    { "CheckBoxCheckBackgroundFillCheckedPressed", accent },
+                    { "SliderThumbBackground", accent },
+                    { "SliderThumbBackgroundPointerOver", accent },
+                    { "SliderOuterThumbBackground", accent },
+                    { "SliderTrackValueFill", accent },
+                    { "ToggleSwitchFillOn", accent },
+                    { "ToggleSwitchFillOnPointerOver", accent },
+                    { "ToggleSwitchFillOnPressed", accent },
+                    { "ComboBoxBorderBrushFocused", accent }
+                };
+
+                foreach (var state in states)
+                    WpfApplication.Current.Resources[state.Key] = new WpfBrush(state.Value);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Failed to apply Fluent theme: " + e.Message);
             }
         }
 

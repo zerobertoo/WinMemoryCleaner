@@ -1,11 +1,11 @@
 ﻿{
-  "Accent": "#0078D4",
-  "MemoryBarIndicatorBackground": "#D13438",
-  "MemoryBarTrackBackground": "#107C10",
-  "PrimaryBackground": "#FFFFFF",
-  "PrimaryBorder": "#CCCCCC",
-  "SecondaryBackground": "#F5F5F5",
-  "SecondaryBorder": "#E0E0E0",
-  "SecondaryDisabled": "#666666",
-  "SecondaryForeground": "#000000"
+  "Accent": "#E30613",
+  "MemoryBarIndicatorBackground": "#111111",
+  "MemoryBarTrackBackground": "#D2CFC8",
+  "PrimaryBackground": "#F4F2EE",
+  "PrimaryBorder": "#111111",
+  "SecondaryBackground": "#FBFAF8",
+  "SecondaryBorder": "#8A8A85",
+  "SecondaryDisabled": "#6E6E69",
+  "SecondaryForeground": "#111111"
 }

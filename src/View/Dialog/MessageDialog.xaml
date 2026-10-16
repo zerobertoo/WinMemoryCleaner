@@ -2,51 +2,49 @@
             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             xmlns:local="clr-namespace:WinMemoryCleaner"
+            xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            AllowsTransparency="True"
-            Background="Transparent"
-            BorderBrush="Transparent"
-            BorderThickness="0"
             DataContext="{Binding MessageViewModel, Source={StaticResource ViewModelLocator}}"
+            ExtendsContentIntoTitleBar="True"
             FlowDirection="{Binding Path=(local:Localizer.Language).Direction}"
             FocusManager.FocusedElement="{Binding ElementName=RightButton}"
-            Foreground="{DynamicResource SecondaryForeground}"
             Icon="/WinMemoryCleaner;component/Resources/Images/win-memory-cleaner.ico"
             ResizeMode="NoResize"
             SizeToContent="WidthAndHeight"
-            SnapsToDevicePixels="True"
             Title="{x:Static local:Constants+App.Title}"
-            UseLayoutRounding="True"
-            WindowStartupLocation="CenterScreen"
-            WindowStyle="None">
-    <Border Background="{DynamicResource PrimaryBackground}"
-            BorderBrush="{DynamicResource PrimaryBorder}"
-            BorderThickness="1"
-            CornerRadius="10"
-            Padding="20">
-        <Grid>
+            WindowBackdropType="Mica"
+            WindowStartupLocation="CenterScreen">
+    <Grid MinWidth="320">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0"
+                     Icon="/WinMemoryCleaner;component/Resources/Images/win-memory-cleaner.ico"
+                     ShowMaximize="False"
+                     ShowMinimize="False"
+                     Title="{x:Static local:Constants+App.Title}" />
+        <Grid Grid.Row="1" Margin="20, 10, 20, 20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock FontWeight="Normal"
-                       Grid.Row="0"
+            <TextBlock Grid.Row="0"
                        Text="{Binding Message}"
                        TextWrapping="Wrap" />
             <StackPanel Grid.Row="1"
                         HorizontalAlignment="Right"
                         Margin="0, 20, 0, 0"
                         Orientation="Horizontal">
-                <Button Click="OnLeftButtonClick"
-                        Content="{Binding LeftButton.Key}"
-                        Margin="0, 0, 15, 0"
-                        Padding="15, 5, 15, 5"
-                        Visibility="{Binding LeftButton.Key, Converter={StaticResource NullToVisibilityConverter}}" />
-                <Button Click="OnRightButtonClick"
-                        Content="{Binding RightButton.Key}"
-                        Padding="15, 5, 15, 5"
-                        Name="RightButton" />
+                <ui:Button Click="OnLeftButtonClick"
+                           Content="{Binding LeftButton.Key}"
+                           Margin="0, 0, 10, 0"
+                           Visibility="{Binding LeftButton.Key, Converter={StaticResource NullToVisibilityConverter}}" />
+                <ui:Button Appearance="Primary"
+                           Click="OnRightButtonClick"
+                           Content="{Binding RightButton.Key}"
+                           Name="RightButton" />
             </StackPanel>
         </Grid>
-    </Border>
+    </Grid>
 </local:View>

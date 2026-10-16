@@ -10,7 +10,7 @@ namespace WinMemoryCleaner
     /// View
     /// </summary>
     /// <seealso cref="Window" />
-    public abstract class View : Window
+    public abstract class View : Wpf.Ui.Controls.FluentWindow
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="View" /> class.

@@ -2,10 +2,9 @@
             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:local="clr-namespace:WinMemoryCleaner"
-            AllowsTransparency="True"
-            Background="Transparent"
-            BorderBrush="Transparent"
-            BorderThickness="0"
+            xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+            ExtendsContentIntoTitleBar="True"
+            WindowBackdropType="Mica"
             DataContext="{Binding MainViewModel, Source={StaticResource ViewModelLocator}}"
             FlowDirection="{Binding Path=(local:Localizer.Language).Direction}"
             FocusManager.FocusedElement="{Binding ElementName=Optimize}"
@@ -19,36 +18,26 @@
             Title="{x:Static local:Constants+App.Title}"
             Topmost="{Binding AlwaysOnTop}"
             UseLayoutRounding="True"
-            WindowStartupLocation="CenterScreen"
-            WindowStyle="None">
+            WindowStartupLocation="CenterScreen">
     <!-- Window -->
-    <Border Background="{DynamicResource PrimaryBackground}" 
-            BorderBrush="{DynamicResource PrimaryBorder}" 
-            BorderThickness="1" 
-            CornerRadius="8"
+    <Border Background="Transparent"
+            BorderThickness="0"
             IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}, FallbackValue=True}">
-        <StackPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <!-- Header -->
-            <Grid Margin="10, 10, 0, 0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0"
-                            KeyboardNavigation.TabNavigation="None"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                    <Image RenderOptions.BitmapScalingMode="Fant"
-                           RenderOptions.EdgeMode="Aliased"
-                           Source="/WinMemoryCleaner;component/Resources/Images/win-memory-cleaner.ico"
-                           VerticalAlignment="Center" />
-                    <TextBlock FontWeight="Normal"
-                               Margin="5, 0, 0, 0"
-                               Text="{Binding Title}"
-                               VerticalAlignment="Center" />
-                </StackPanel>
-                <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
+            <ui:TitleBar Grid.Row="0"
+                         Icon="/WinMemoryCleaner;component/Resources/Images/win-memory-cleaner.ico"
+                         ShowClose="False"
+                         ShowMaximize="False"
+                         ShowMinimize="False"
+                         Title="{Binding Title}">
+                <ui:TitleBar.TrailingContent>
+                <StackPanel                             Orientation="Horizontal"
                             VerticalAlignment="Center">
                     <!-- Help Button -->
                     <Button Background="Transparent" 
@@ -179,12 +168,14 @@
                         </Grid>
                     </Button>
                 </StackPanel>
-            </Grid>
+                </ui:TitleBar.TrailingContent>
+            </ui:TitleBar>
             <!-- Content -->
-            <Grid Margin="10, 0, 10, 0"
+            <Grid Grid.Row="2" Margin="10, 4, 10, 10"
                   Visibility="{Binding CompactMode, Converter={StaticResource InverseBooleanToVisibilityConverter}, FallbackValue={x:Static Visibility.Visible}}"
                   x:Name="ContentGrid">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
@@ -243,12 +234,12 @@
                     </StackPanel>
                 </GroupBox>
                 <!-- Memory Areas -->
-                <GroupBox Grid.Column="0" 
-                          Grid.Row="1"
+                <GroupBox Grid.Column="1" 
+                          Grid.Row="0"
                           Header="{Binding Path=(local:Localizer.String).MemoryAreas}"
-                          Margin="0, 5, 5, 0">
+                          Margin="5, 5, 5, 0">
                     <ItemsControl ItemsSource="{Binding MemoryAreaItems}"
-                                  VerticalAlignment="Center">
+                                  VerticalAlignment="Top">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding Name}"
@@ -262,12 +253,12 @@
                 </GroupBox>
                 <!-- Optimization Hotkey -->
                 <GroupBox Grid.Column="0"
-                              Grid.Row="2"
+                              Grid.Row="1"
                               Header="{Binding Path=(local:Localizer.String).OptimizationHotkey}"
                               Margin="0, 5, 5, 0"
                               Visibility="{Binding Computer.OperatingSystem.HasHotkeyManager, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue={x:Static Visibility.Collapsed}}">
                     <StackPanel Orientation="Horizontal"
-                                VerticalAlignment="Center">
+                                VerticalAlignment="Top">
                         <CheckBox IsChecked="{Binding UseHotkey}"
                                   VerticalAlignment="Center" />
                         <ComboBox DisplayMemberPath="Value"
@@ -298,10 +289,41 @@
                                    Visibility="{Binding IsOptimizationKeyValid, Converter={StaticResource InverseBooleanToVisibilityConverter}, FallbackValue={x:Static Visibility.Collapsed}}" />
                     </StackPanel>
                 </GroupBox>
+                    <!-- Auto Optimization -->
+                    <GroupBox Grid.Column="1"
+                              Grid.Row="1"
+                              Header="{Binding Path=(local:Localizer.String).AutoOptimization}"
+                              Margin="5, 5, 5, 0">
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Grid.Row="0">
+                                <TextBlock Text="{Binding AutoOptimizationMemoryIntervalDescription}" />
+                                <Slider IsSnapToTickEnabled="True"
+                                        Margin="0, 10, 0, 9"
+                                        Maximum="168"
+                                        Minimum="0"
+                                        Name="AutoOptimizationIntervalSlider" 
+                                        TickFrequency="1"
+                                        Value="{Binding AutoOptimizationInterval}"
+                                        VerticalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Text="{Binding AutoOptimizationMemoryUsageDescription}" />
+                                <Slider IsSnapToTickEnabled="True"
+                                        Margin="0, 10, 0, 0"
+                                        Maximum="100"
+                                        Minimum="0"
+                                        Name="AutoOptimizationMemoryUsageSlider"
+                                        TickFrequency="1"
+                                        ToolTip="{Binding AutoOptimizationMemoryUsageWarning}"
+                                        Value="{Binding AutoOptimizationMemoryUsage}"
+                                        VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
                 <!-- Tray Icon | Process Exclusion List | Auto Optimization -->
-                <Grid Grid.Column="1"
+                <Grid Grid.Column="2"
                       Grid.Row="0"
-                      Grid.RowSpan="3"
+                      Grid.RowSpan="2"
                       VerticalAlignment="Stretch">
                     <Grid.MaxHeight>
                         <MultiBinding Converter="{StaticResource SumNumericConverter}">
@@ -570,43 +592,13 @@
                                     VerticalAlignment="Stretch" />
                         </Grid>
                     </GroupBox>
-                    <!-- Auto Optimization -->
-                    <GroupBox Grid.Column="0"
-                              Grid.Row="2"
-                              Header="{Binding Path=(local:Localizer.String).AutoOptimization}"
-                              Margin="5, 5, 0, 0">
-                        <StackPanel VerticalAlignment="Center">
-                            <StackPanel Grid.Row="0">
-                                <TextBlock Text="{Binding AutoOptimizationMemoryIntervalDescription}" />
-                                <Slider IsSnapToTickEnabled="True"
-                                        Margin="0, 10, 0, 9"
-                                        Maximum="168"
-                                        Minimum="0"
-                                        Name="AutoOptimizationIntervalSlider" 
-                                        TickFrequency="1"
-                                        Value="{Binding AutoOptimizationInterval}"
-                                        VerticalAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Grid.Row="1">
-                                <TextBlock Text="{Binding AutoOptimizationMemoryUsageDescription}" />
-                                <Slider IsSnapToTickEnabled="True"
-                                        Margin="0, 10, 0, 0"
-                                        Maximum="100"
-                                        Minimum="0"
-                                        Name="AutoOptimizationMemoryUsageSlider"
-                                        TickFrequency="1"
-                                        ToolTip="{Binding AutoOptimizationMemoryUsageWarning}"
-                                        Value="{Binding AutoOptimizationMemoryUsage}"
-                                        VerticalAlignment="Center" />
-                            </StackPanel>
-                        </StackPanel>
-                    </GroupBox>
                 </Grid>
             </Grid>
             <!-- Footer -->
-            <Grid Margin="10, 0, 10, 10">
+            <Grid Grid.Row="1" Margin="10, 0, 10, 6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="230" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -619,7 +611,27 @@
                           Header="{Binding PhysicalMemoryHeader}"
                           KeyboardNavigation.TabNavigation="None"
                           Margin="0, 5, 0, 0">
-                    <Grid VerticalAlignment="Center">
+                    <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!-- Clock dial: the red hand reads physical memory in use (0-100% = one revolution) -->
+                    <Grid Grid.Column="0" Height="72" Margin="2, 0, 14, 0" VerticalAlignment="Center" Width="72">
+                        <Ellipse Fill="Transparent" Stroke="{DynamicResource SecondaryForeground}" StrokeThickness="3" />
+                        <Rectangle Fill="{DynamicResource Accent}" Height="29" HorizontalAlignment="Center" Margin="0, 7, 0, 0" RenderTransformOrigin="0.5, 1" VerticalAlignment="Top" Width="4">
+                            <Rectangle.RenderTransform>
+                                <RotateTransform Angle="{Binding Computer.Memory.Physical.Used.Percentage, Converter={StaticResource PercentageToAngleConverter}}" />
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Ellipse Fill="{DynamicResource Accent}" Height="10" Width="10" />
+                    </Grid>
+                    <StackPanel Grid.Column="1" Margin="0, 0, 22, 0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock FontSize="44" FontWeight="Bold" Text="{Binding Computer.Memory.Physical.Used.Value, Converter={StaticResource StringFormatConverter}, ConverterParameter={}{0:0.#}}" VerticalAlignment="Bottom" />
+                        <TextBlock FontSize="18" FontWeight="Bold" Margin="4, 0, 0, 7" Text="{Binding Computer.Memory.Physical.Used.Unit}" VerticalAlignment="Bottom" />
+                    </StackPanel>
+                    <Grid Grid.Column="2" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
@@ -647,12 +659,12 @@
                                     <Grid VerticalAlignment="Stretch">
                                         <Border Background="{DynamicResource MemoryBarTrackBackground}"
                                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="3"
+                                                CornerRadius="0"
                                                 Name="PART_Track"
                                                 VerticalAlignment="Stretch" />
                                         <Border Background="{DynamicResource MemoryBarIndicatorBackground}" 
                                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="3"
+                                                CornerRadius="0"
                                                 HorizontalAlignment="Left"
                                                 Name="PART_Indicator"
                                                 VerticalAlignment="Stretch" />
@@ -662,7 +674,7 @@
                         </ProgressBar>
                         <Border Background="{DynamicResource MemoryBarIndicatorBackground}" 
                                 BorderThickness="0" 
-                                CornerRadius="3"
+                                CornerRadius="0"
                                 Grid.Column="0"
                                 Grid.Row="1"
                                 Height="12" 
@@ -692,7 +704,7 @@
                         </StackPanel>
                         <Border Background="{DynamicResource MemoryBarTrackBackground}" 
                                 BorderThickness="0" 
-                                CornerRadius="3" 
+                                CornerRadius="0" 
                                 Grid.Column="3"
                                 Grid.Row="1"
                                 Height="12" 
@@ -720,6 +732,7 @@
                             <TextBlock Text="%)"
                                        VerticalAlignment="Center" />
                         </StackPanel>
+                    </Grid>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Column="0"
@@ -757,12 +770,12 @@
                                     <Grid VerticalAlignment="Stretch">
                                         <Border Background="{DynamicResource MemoryBarTrackBackground}"
                                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="3"
+                                                CornerRadius="0"
                                                 Name="PART_Track"
                                                 VerticalAlignment="Stretch" />
                                         <Border Background="{DynamicResource MemoryBarIndicatorBackground}" 
                                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="3"
+                                                CornerRadius="0"
                                                 HorizontalAlignment="Left"
                                                 Name="PART_Indicator"
                                                 VerticalAlignment="Stretch" />
@@ -772,7 +785,7 @@
                         </ProgressBar>
                         <Border Background="{DynamicResource MemoryBarIndicatorBackground}" 
                                 BorderThickness="0" 
-                                CornerRadius="3"
+                                CornerRadius="0"
                                 Grid.Column="0"
                                 Grid.Row="1"
                                 Height="12" 
@@ -802,7 +815,7 @@
                         </StackPanel>
                         <Border Background="{DynamicResource MemoryBarTrackBackground}" 
                                 BorderThickness="0" 
-                                CornerRadius="3" 
+                                CornerRadius="0" 
                                 Grid.Column="3"
                                 Grid.Row="1"
                                 Height="12" 
@@ -833,21 +846,27 @@
                     </Grid>
                 </GroupBox>
                 <!-- Optimize -->
-                <Button Command="{Binding OptimizeCommand}" 
+                <ui:Button Appearance="Primary"
+                        Command="{Binding OptimizeCommand}" 
                         Content="{Binding Path=(local:Localizer.String).Optimize}" 
-                        Grid.Column="0"
-                        Grid.Row="2"
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
                         KeyboardNavigation.TabIndex="0"
-                        Margin="0, 10, 0, 0"
+                        Margin="10, 5, 0, 0"
                         Name="Optimize"
-                        Padding="10, 5, 10, 5"
-                        Style="{StaticResource ButtonWithFocusFadeStyle}"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Padding="10, 9, 10, 9"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
                         TabIndex="0"
-                        VerticalAlignment="Center" />
-                <Grid Grid.Column="0"
-                      Grid.Row="2"
+                        VerticalAlignment="Stretch" />
+                <Grid Grid.Column="1"
+                      Grid.Row="0"
+                      Grid.RowSpan="2"
                       Height="Auto"
-                      Margin="0, 10, 0, 0"
+                      Margin="10, 5, 0, 0"
                       Visibility="{Binding IsOptimizationRunning, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue={x:Static Visibility.Hidden}}"
                       VerticalAlignment="Stretch">
                     <ProgressBar BorderBrush="{DynamicResource Accent}"
@@ -865,13 +884,13 @@
                                     <Border Background="{DynamicResource SecondaryBackground}"
                                             BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="{TemplateBinding BorderThickness}"
-                                            CornerRadius="3"
+                                            CornerRadius="0"
                                             Name="PART_Track"
                                             VerticalAlignment="Stretch" />
                                     <Border Background="{DynamicResource Accent}" 
                                             BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="{TemplateBinding BorderThickness}"
-                                            CornerRadius="3"
+                                            CornerRadius="0"
                                             HorizontalAlignment="Left"
                                             Name="PART_Indicator"
                                             VerticalAlignment="Stretch" />
@@ -882,13 +901,13 @@
                     <TextBlock FontWeight="Normal"
                                Foreground="{DynamicResource SecondaryForeground}"
                                HorizontalAlignment="Left"
-                               Margin="10, 0, 5, 0"
+                               Margin="10, 10, 10, 0"
                                Text="{Binding OptimizationProgressStep}"
-                               VerticalAlignment="Center" />
-                    <StackPanel HorizontalAlignment="Right"
+                               VerticalAlignment="Top" />
+                    <StackPanel HorizontalAlignment="Left"
                                 Orientation="Horizontal"
-                                Margin="5, 0, 10, 0"
-                                VerticalAlignment="Center">
+                                Margin="10, 0, 10, 10"
+                                VerticalAlignment="Bottom">
                         <TextBlock FontWeight="Normal"
                                    Foreground="{DynamicResource SecondaryForeground}"
                                    Text="{Binding OptimizationProgressValue}"
@@ -916,6 +935,6 @@
                     </StackPanel>
                 </Grid>
             </Grid>
-        </StackPanel>
+        </Grid>
     </Border>
 </local:View>
