@@ -35,5 +35,31 @@ namespace WinMemoryCleaner
 
             return null;
         }
+
+        /// <summary>
+        /// Indica se a otimização deve ser adiada porque o usuário ainda está ativo
+        /// </summary>
+        /// <param name="onlyWhenIdle">Configuração ativa</param>
+        /// <param name="idle">Tempo sem entrada do usuário</param>
+        /// <param name="requiredIdle">Ociosidade mínima exigida</param>
+        public static bool ShouldDefer(bool onlyWhenIdle, TimeSpan idle, TimeSpan requiredIdle)
+        {
+            return onlyWhenIdle && idle < requiredIdle;
+        }
+
+        /// <summary>
+        /// Tempo desde a última entrada do usuário (teclado/mouse) na sessão atual.
+        /// Em caso de falha retorna <see cref="TimeSpan.MaxValue" /> (não adia).
+        /// </summary>
+        public static TimeSpan GetIdleTime()
+        {
+            var info = new NativeMethods.LastInputInfo { Size = (uint)System.Runtime.InteropServices.Marshal.SizeOf<NativeMethods.LastInputInfo>() };
+
+            if (!NativeMethods.GetLastInputInfo(ref info))
+                return TimeSpan.MaxValue;
+
+            // aritmética em uint tolera a volta do contador de ticks (~49 dias)
+            return TimeSpan.FromMilliseconds(unchecked((uint)Environment.TickCount - info.Time));
+        }
     }
 }

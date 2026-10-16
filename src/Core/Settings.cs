@@ -32,6 +32,11 @@ namespace WinMemoryCleaner
 
         public static int AutoOptimizationMemoryUsage { get; set; }
 
+        /// <summary>
+        /// Adia a otimização automática da GUI enquanto o usuário está ativo (sem opção na UI; chave de registro)
+        /// </summary>
+        public static bool AutoOptimizationOnlyWhenIdle { get; set; }
+
         public static bool AutoUpdate { get; set; }
 
         public static bool CloseAfterOptimization { get; set; }
@@ -125,6 +130,7 @@ namespace WinMemoryCleaner
             AlwaysOnTop = false;
             AutoOptimizationInterval = 0;
             AutoOptimizationMemoryUsage = 0;
+            AutoOptimizationOnlyWhenIdle = false;
             AutoUpdate = true;
             CloseAfterOptimization = false;
             CloseToTheNotificationArea = false;
@@ -177,6 +183,7 @@ namespace WinMemoryCleaner
                         AlwaysOnTop = Convert.ToBoolean(key.GetValue(nameof(AlwaysOnTop), AlwaysOnTop), _culture);
                         AutoOptimizationInterval = Convert.ToInt32(key.GetValue(nameof(AutoOptimizationInterval), AutoOptimizationInterval), _culture);
                         AutoOptimizationMemoryUsage = Convert.ToInt32(key.GetValue(nameof(AutoOptimizationMemoryUsage), AutoOptimizationMemoryUsage), _culture);
+                        AutoOptimizationOnlyWhenIdle = Convert.ToBoolean(key.GetValue(nameof(AutoOptimizationOnlyWhenIdle), AutoOptimizationOnlyWhenIdle), _culture);
                         AutoUpdate = Convert.ToBoolean(key.GetValue(nameof(AutoUpdate), AutoUpdate), _culture);
                         CloseAfterOptimization = Convert.ToBoolean(key.GetValue(nameof(CloseAfterOptimization), CloseAfterOptimization), _culture);
                         CloseToTheNotificationArea = Convert.ToBoolean(key.GetValue(nameof(CloseToTheNotificationArea), CloseToTheNotificationArea), _culture);
@@ -294,6 +301,7 @@ namespace WinMemoryCleaner
                         key.SetValue(nameof(AlwaysOnTop), AlwaysOnTop ? 1 : 0);
                         key.SetValue(nameof(AutoOptimizationInterval), AutoOptimizationInterval);
                         key.SetValue(nameof(AutoOptimizationMemoryUsage), AutoOptimizationMemoryUsage);
+                        key.SetValue(nameof(AutoOptimizationOnlyWhenIdle), AutoOptimizationOnlyWhenIdle ? 1 : 0);
                         key.SetValue(nameof(AutoUpdate), AutoUpdate ? 1 : 0);
                         key.SetValue(nameof(CloseAfterOptimization), CloseAfterOptimization ? 1 : 0);
                         key.SetValue(nameof(CloseToTheNotificationArea), CloseToTheNotificationArea ? 1 : 0);

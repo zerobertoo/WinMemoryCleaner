@@ -1641,7 +1641,8 @@ namespace WinMemoryCleaner
                         {
                             var reason = AutoOptimizationTrigger.Decide(DateTimeOffset.Now, Settings.AutoOptimizationInterval, _lastAutoOptimizationByInterval, Settings.AutoOptimizationMemoryUsage, Computer.Memory.Physical.Free.Percentage, _lastAutoOptimizationByMemoryUsage, Constants.App.AutoOptimizationMemoryUsageInterval);
 
-                            if (reason is not null)
+                            // Usuário ativo: adia sem atualizar os carimbos, a decisão é refeita no próximo ciclo (60 s)
+                            if (reason is not null && !AutoOptimizationTrigger.ShouldDefer(Settings.AutoOptimizationOnlyWhenIdle, AutoOptimizationTrigger.GetIdleTime(), TimeSpan.FromMinutes(5)))
                             {
                                 OptimizeAsync(reason.Value);
 

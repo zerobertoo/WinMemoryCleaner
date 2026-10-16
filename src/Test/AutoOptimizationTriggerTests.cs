@@ -40,6 +40,21 @@ namespace WinMemoryCleaner.Test
             Assert.IsNull(AutoOptimizationTrigger.Decide(Now, 0, Now, 20, 10, Now.AddMinutes(-1), 5));
         }
 
+        [TestCase(false, 0, false)]
+        [TestCase(true, 1, true)]
+        [TestCase(true, 5, false)]
+        [TestCase(true, 30, false)]
+        public void ShouldDefer_OnlyWhenEnabledAndUserRecentlyActive(bool onlyWhenIdle, int idleMinutes, bool expected)
+        {
+            Assert.AreEqual(expected, AutoOptimizationTrigger.ShouldDefer(onlyWhenIdle, TimeSpan.FromMinutes(idleMinutes), TimeSpan.FromMinutes(5)));
+        }
+
+        [Test]
+        public void GetIdleTime_ReturnsNonNegative()
+        {
+            Assert.GreaterOrEqual(AutoOptimizationTrigger.GetIdleTime(), TimeSpan.Zero);
+        }
+
         [Test]
         public void IntervalWinsOverLowMemory()
         {

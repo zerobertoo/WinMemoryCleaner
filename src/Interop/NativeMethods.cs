@@ -19,6 +19,17 @@ namespace WinMemoryCleaner
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool AllowSetForegroundWindow(int dwProcessId);
 
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct LastInputInfo
+        {
+            internal uint Size;
+            internal uint Time;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool GetLastInputInfo(ref LastInputInfo lastInputInfo);
+
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool AttachConsole(int dwProcessId);
