@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -145,10 +146,11 @@ namespace WinMemoryCleaner
         /// </summary>
         /// <param name="reason">Optimization reason</param>
         /// <param name="areas">Memory areas</param>
-        public void Optimize(Enums.Memory.Optimization.Reason reason, Enums.Memory.Areas areas)
+        /// <returns>Resultado por área; vazio quando nada foi executado</returns>
+        public OptimizationResult Optimize(Enums.Memory.Optimization.Reason reason, Enums.Memory.Areas areas)
         {
             if (areas == Enums.Memory.Areas.None)
-                return;
+                return OptimizationResult.Skipped;
 
             // Exclusão mútua entre processos (GUI, serviço e linha de comando): se outra otimização está em curso, esta é descartada
             System.Threading.Mutex mutex = null;
@@ -181,12 +183,12 @@ namespace WinMemoryCleaner
                 Logger.Information(Localizer.String.Optimize + ": another optimization is already running, skipped");
                 mutex.Dispose();
 
-                return;
+                return OptimizationResult.Skipped;
             }
 
             try
             {
-                OptimizeAreas(reason, areas);
+                return OptimizeAreas(reason, areas);
             }
             finally
             {
@@ -201,272 +203,54 @@ namespace WinMemoryCleaner
         /// <summary>
         /// Executa a otimização de cada área, isolando falhas por área
         /// </summary>
-        private void OptimizeAreas(Enums.Memory.Optimization.Reason reason, Enums.Memory.Areas areas)
+        private OptimizationResult OptimizeAreas(Enums.Memory.Optimization.Reason reason, Enums.Memory.Areas areas)
         {
-
-            var errorRuntime = new TimeSpan();
-            var infoRuntime = new TimeSpan();
+            var result = new OptimizationResult();
             var optimizationReason = reason.GetString();
-            var stopwatch = new Stopwatch();
             var value = (byte)0;
 
-            var error = new LogOptimizationData { Reason = optimizationReason };
-            var info = new LogOptimizationData { Reason = optimizationReason };
+            // Com as duas áreas de standby marcadas, o purge completo prevalece sobre o de baixa prioridade
+            var lowPriority = (areas & Enums.Memory.Areas.StandbyListLowPriority) != 0 && (areas & Enums.Memory.Areas.StandbyList) == 0;
 
-            // Optimize Working Set
-            if ((areas & Enums.Memory.Areas.WorkingSet) != 0)
+            var steps = new List<(Enums.Memory.Areas Flags, string Name, Action Run)>
             {
-                try
-                {
-                    if (OnOptimizeProgressUpdate is not null)
-                    {
-                        value++;
-                        OnOptimizeProgressUpdate(value, Localizer.String.WorkingSet);
-                    }
+                (Enums.Memory.Areas.WorkingSet, Localizer.String.WorkingSet, OptimizeWorkingSet),
+                (Enums.Memory.Areas.SystemFileCache, Localizer.String.SystemFileCache, OptimizeSystemFileCache),
+                (Enums.Memory.Areas.ModifiedPageList, Localizer.String.ModifiedPageList, OptimizeModifiedPageList),
+                (Enums.Memory.Areas.StandbyList | Enums.Memory.Areas.StandbyListLowPriority, lowPriority ? Localizer.String.StandbyListLowPriority : Localizer.String.StandbyList, () => OptimizeStandbyList(lowPriority)),
+                (Enums.Memory.Areas.CombinedPageList, Localizer.String.CombinedPageList, OptimizeCombinedPageList),
+                (Enums.Memory.Areas.RegistryCache, Localizer.String.RegistryCache, OptimizeRegistryCache),
+                (Enums.Memory.Areas.ModifiedFileCache, Localizer.String.ModifiedFileCache, OptimizeModifiedFileCache)
+            };
 
-                    stopwatch.Restart();
+            var stopwatch = new Stopwatch();
 
-                    OptimizeWorkingSet();
-
-                    info.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.WorkingSet,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture))
-                    });
-
-                    infoRuntime = infoRuntime.Add(stopwatch.Elapsed);
-                }
-                catch (Exception e)
-                {
-                    error.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.WorkingSet,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture)),
-                        Error = e.GetMessage()
-                    });
-
-                    errorRuntime = errorRuntime.Add(stopwatch.Elapsed);
-                }
-            }
-
-            // Optimize System File Cache
-            if ((areas & Enums.Memory.Areas.SystemFileCache) != 0)
+            foreach (var step in steps)
             {
-                try
-                {
-                    if (OnOptimizeProgressUpdate is not null)
-                    {
-                        value++;
-                        OnOptimizeProgressUpdate(value, Localizer.String.SystemFileCache);
-                    }
+                if ((areas & step.Flags) == 0)
+                    continue;
 
-                    stopwatch.Restart();
-
-                    OptimizeSystemFileCache();
-
-                    info.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.SystemFileCache,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture))
-                    });
-
-                    infoRuntime = infoRuntime.Add(stopwatch.Elapsed);
-                }
-                catch (Exception e)
-                {
-                    error.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.SystemFileCache,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture)),
-                        Error = e.GetMessage()
-                    });
-
-                    errorRuntime = errorRuntime.Add(stopwatch.Elapsed);
-                }
-            }
-
-            // Optimize Modified Page List
-            if ((areas & Enums.Memory.Areas.ModifiedPageList) != 0)
-            {
-                try
-                {
-                    if (OnOptimizeProgressUpdate is not null)
-                    {
-                        value++;
-                        OnOptimizeProgressUpdate(value, Localizer.String.ModifiedPageList);
-                    }
-
-                    stopwatch.Restart();
-
-                    OptimizeModifiedPageList();
-
-                    info.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.ModifiedPageList,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture))
-                    });
-
-                    infoRuntime = infoRuntime.Add(stopwatch.Elapsed);
-                }
-                catch (Exception e)
-                {
-                    error.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.ModifiedPageList,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture)),
-                        Error = e.GetMessage()
-                    });
-
-                    errorRuntime = errorRuntime.Add(stopwatch.Elapsed);
-                }
-            }
-
-            // Optimize Standby List
-            if ((areas & (Enums.Memory.Areas.StandbyList | Enums.Memory.Areas.StandbyListLowPriority)) != 0)
-            {
-                // Com as duas áreas marcadas, o purge completo prevalece sobre o de baixa prioridade
-                var lowPriority = (areas & Enums.Memory.Areas.StandbyListLowPriority) != 0 && (areas & Enums.Memory.Areas.StandbyList) == 0;
-                var standbyList = lowPriority ? Localizer.String.StandbyListLowPriority : Localizer.String.StandbyList;
+                var areaResult = new OptimizationAreaResult { Name = step.Name };
 
                 try
                 {
                     if (OnOptimizeProgressUpdate is not null)
                     {
                         value++;
-                        OnOptimizeProgressUpdate(value, standbyList);
+                        OnOptimizeProgressUpdate(value, step.Name);
                     }
 
                     stopwatch.Restart();
 
-                    OptimizeStandbyList(lowPriority);
-
-                    info.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = standbyList,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture))
-                    });
-
-                    infoRuntime = infoRuntime.Add(stopwatch.Elapsed);
+                    step.Run();
                 }
                 catch (Exception e)
                 {
-                    error.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = standbyList,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture)),
-                        Error = e.GetMessage()
-                    });
-
-                    errorRuntime = errorRuntime.Add(stopwatch.Elapsed);
+                    areaResult.Error = e.GetMessage();
                 }
-            }
 
-            // Optimize Combined Page List
-            if ((areas & Enums.Memory.Areas.CombinedPageList) != 0)
-            {
-                try
-                {
-                    if (OnOptimizeProgressUpdate is not null)
-                    {
-                        value++;
-                        OnOptimizeProgressUpdate(value, Localizer.String.CombinedPageList);
-                    }
-
-                    stopwatch.Restart();
-
-                    OptimizeCombinedPageList();
-
-                    info.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.CombinedPageList,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture))
-                    });
-
-                    infoRuntime = infoRuntime.Add(stopwatch.Elapsed);
-                }
-                catch (Exception e)
-                {
-                    error.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.CombinedPageList,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture)),
-                        Error = e.GetMessage()
-                    });
-
-                    errorRuntime = errorRuntime.Add(stopwatch.Elapsed);
-                }
-            }
-
-            // Optimize Registry Cache
-            if ((areas & Enums.Memory.Areas.RegistryCache) != 0)
-            {
-                try
-                {
-                    if (OnOptimizeProgressUpdate is not null)
-                    {
-                        value++;
-                        OnOptimizeProgressUpdate(value, Localizer.String.RegistryCache);
-                    }
-
-                    stopwatch.Restart();
-
-                    OptimizeRegistryCache();
-
-                    info.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.RegistryCache,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture))
-                    });
-
-                    infoRuntime = infoRuntime.Add(stopwatch.Elapsed);
-                }
-                catch (Exception e)
-                {
-                    error.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.RegistryCache,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture)),
-                        Error = e.GetMessage()
-                    });
-
-                    errorRuntime = errorRuntime.Add(stopwatch.Elapsed);
-                }
-            }
-
-            // Optimize Modified File Cache
-            if ((areas & Enums.Memory.Areas.ModifiedFileCache) != 0)
-            {
-                try
-                {
-                    if (OnOptimizeProgressUpdate is not null)
-                    {
-                        value++;
-                        OnOptimizeProgressUpdate(value, Localizer.String.ModifiedFileCache);
-                    }
-
-                    stopwatch.Restart();
-
-                    OptimizeModifiedFileCache();
-
-                    info.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.ModifiedFileCache,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture))
-                    });
-
-                    infoRuntime = infoRuntime.Add(stopwatch.Elapsed);
-                }
-                catch (Exception e)
-                {
-                    error.MemoryAreas.Add(new LogOptimizationDataMemoryArea
-                    {
-                        Name = Localizer.String.ModifiedFileCache,
-                        Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", stopwatch.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture)),
-                        Error = e.GetMessage()
-                    });
-
-                    errorRuntime = errorRuntime.Add(stopwatch.Elapsed);
-                }
+                areaResult.Elapsed = stopwatch.Elapsed;
+                result.Areas.Add(areaResult);
             }
 
             // Garbage Collector
@@ -488,25 +272,42 @@ namespace WinMemoryCleaner
             // Log
             try
             {
-                // Info
-                if (info.MemoryAreas.Any())
-                {
-                    info.Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", infoRuntime.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture));
-
-                    Logger.Log(new Log(Enums.Log.Levels.Information, Localizer.String.MemoryOptimized, info));
-                }
-                // Error
-                if (error.MemoryAreas.Any())
-                {
-                    error.Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", errorRuntime.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture));
-
-                    Logger.Log(new Log(Enums.Log.Levels.Error, Localizer.String.Invalid, error));
-                }
+                LogResult(optimizationReason, result.Areas.Where(area => area.Succeeded), Enums.Log.Levels.Information, Localizer.String.MemoryOptimized);
+                LogResult(optimizationReason, result.Failed, Enums.Log.Levels.Error, Localizer.String.Invalid);
             }
             catch
             {
                 // ignored
             }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Registra no log as áreas informadas com a duração total
+        /// </summary>
+        private static void LogResult(string reason, IEnumerable<OptimizationAreaResult> areaResults, Enums.Log.Levels level, string message)
+        {
+            var list = areaResults.ToList();
+
+            if (list.Count == 0)
+                return;
+
+            var data = new LogOptimizationData { Reason = reason };
+
+            foreach (var area in list)
+            {
+                data.MemoryAreas.Add(new LogOptimizationDataMemoryArea
+                {
+                    Name = area.Name,
+                    Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", area.Elapsed.TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture)),
+                    Error = area.Error
+                });
+            }
+
+            data.Duration = string.Format(Localizer.Culture, "{0:0.0} {1}", list.Aggregate(TimeSpan.Zero, (total, area) => total + area.Elapsed).TotalSeconds, Localizer.String.Seconds.ToLower(Localizer.Culture));
+
+            Logger.Log(new Log(level, message, data));
         }
 
         /// <summary>

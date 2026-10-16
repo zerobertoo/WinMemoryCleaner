@@ -264,9 +264,13 @@ Decisões (delegadas pelo dono do projeto) e o que foi implementado nos commits 
 
 A-01, A-02, A-03, A-04, A-05 (NTSTATUS convertido via `RtlNtStatusToDosError` em um wrapper, sem tocar nos call sites), A-06 (registro do hotkey despachado à thread da UI + `_registered` só guarda registro bem-sucedido), A-07, A-08 (`catch` + `?.` em `Optimize`), A-09 (try/catch, anti-reentrância e `OnStop` aguardando), M-01 (erro 1300), M-02 (privilégio no RegistryCache), M-03 (volumes: falha em um não aborta os demais, erros agregados), M-04, M-11, B-04 (comparação de versão), B-05 (mensagem do privilégio).
 
+### Fase 2 — relatório por área (T-06, M-08)
+
+`IComputerService.Optimize` retorna `OptimizationResult` (resultado por área: nome, duração, erro). O loop duplicado das áreas virou uma tabela em `ComputerService.OptimizeAreas`. A notificação da UI lista as áreas que falharam em caso de sucesso parcial. O serviço do Windows ainda ignora o retorno (só loga). +3 testes (353 verdes).
+
 ### Pendente / não alterado
 
-- **A-10** (deadlock potencial no tray), **M-06** (`IsBusy` compartilhado), **M-07** (lista de exclusão sem sincronização), **M-08** (aviso ao usuário de falha parcial), **M-09** (NotifyIcon fora da UI): exigem mexer no `NotificationService` e no modelo de `IsBusy`; sem como validar sem rodar a UI com admin.
+- **A-10** (deadlock potencial no tray), **M-06** (`IsBusy` compartilhado), **M-07** (lista de exclusão sem sincronização), **M-09** (NotifyIcon fora da UI): exigem mexer no `NotificationService` e no modelo de `IsBusy`; sem como validar sem rodar a UI com admin.
 - **M-05** (tamanho das structs): não alterado. Com `Pack = 1`, trocar `Flags` para `uint` reduziria `MemoryCombineInformationEx` a 20 bytes e quebraria o x64 que hoje coincide com os 24 nativos; o tamanho de `SystemFileCacheInformation64` precisa ser validado contra o WDK em máquina real.
 - **M-12, M-14, M-15, M-16** e a maioria dos baixos.
 - **Efeito colateral do `net start`:** se o serviço estava instalado mas parado de propósito, o update o inicia.

@@ -15,6 +15,7 @@
         /// </summary>
         /// <param name="reason">Optimization reason</param>
         /// <param name="areas">Memory areas</param>
-        void Optimize(Enums.Memory.Optimization.Reason reason, Enums.Memory.Areas areas);
+        /// <returns>Resultado por área; vazio quando nada foi executado</returns>
+        OptimizationResult Optimize(Enums.Memory.Optimization.Reason reason, Enums.Memory.Areas areas);
     }
 }

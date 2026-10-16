@@ -1769,7 +1769,7 @@ namespace WinMemoryCleaner
                     var tempPhysicalAvailable = memoryBefore.Physical.Free.Bytes;
                     var tempVirtualAvailable = memoryBefore.Virtual.Free.Bytes;
 
-                    _computerService.Optimize(reason, Settings.MemoryAreas);
+                    var optimizationResult = _computerService.Optimize(reason, Settings.MemoryAreas);
 
                     // Update memory info
                     Computer.Memory = _computerService.Memory;
@@ -1785,6 +1785,10 @@ namespace WinMemoryCleaner
                         var message = Settings.ShowVirtualMemory
                             ? string.Format(Localizer.Culture, "{1}{0}{0}{2}: {3}{0}{4}: {5:0.#} {6}{0}{7}: {8:0.#} {9}", Environment.NewLine, Localizer.String.MemoryOptimized.ToUpper(Localizer.Culture), Localizer.String.Reason, reason.GetString(), Localizer.String.PhysicalMemory, physicalReleased.Key, physicalReleased.Value, Localizer.String.VirtualMemory, virtualReleased.Key, virtualReleased.Value)
                             : string.Format(Localizer.Culture, "{1}{0}{0}{2}: {3}{0}{4}: {5:0.#} {6}", Environment.NewLine, Localizer.String.MemoryOptimized.ToUpper(Localizer.Culture), Localizer.String.Reason, reason.GetString(), Localizer.String.PhysicalMemory, physicalReleased.Key, physicalReleased.Value);
+
+                        // Sucesso parcial: lista as áreas que falharam
+                        if (optimizationResult.HasFailures)
+                            message += Environment.NewLine + Localizer.String.Error + ": " + string.Join(", ", optimizationResult.Failed.Select(area => area.Name));
 
                         Notify(message);
                     }
