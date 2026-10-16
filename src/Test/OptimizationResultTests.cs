@@ -7,6 +7,19 @@ namespace WinMemoryCleaner.Test
     [TestFixture]
     public class OptimizationResultTests
     {
+        [TestCase("chrome", "chrome", true)]
+        [TestCase("CHROME", "chrome", true)]
+        [TestCase("chrome", "chro", false)]
+        [TestCase("chrome", "chr*", true)]
+        [TestCase("msedgewebview2", "*webview?", true)]
+        [TestCase("a.b", "a.b", true)]
+        [TestCase("axb", "a.b", false)]
+        [TestCase("", "*", false)]
+        public void ProcessExclusion_MatchesExactNamesAndWildcards(string name, string entry, bool expected)
+        {
+            Assert.AreEqual(expected, ProcessExclusion.IsExcluded(name, new[] { entry }));
+        }
+
         [Test]
         public void Skipped_HasNoAreasAndNoFailures()
         {

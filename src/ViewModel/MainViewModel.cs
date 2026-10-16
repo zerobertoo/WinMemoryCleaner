@@ -823,7 +823,7 @@ namespace WinMemoryCleaner
             get
             {
                 var processes = new ObservableCollection<string>(Process.GetProcesses()
-                    .Where(process => process != null && !process.ProcessName.Equals(Constants.App.Name) && !Settings.GetProcessExclusionSnapshot().Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase))
+                    .Where(process => process != null && !process.ProcessName.Equals(Constants.App.Name) && !ProcessExclusion.IsExcluded(process.ProcessName, Settings.GetProcessExclusionSnapshot()))
                     .Select(process => process.ProcessName.ToLower(Localizer.Culture).Replace(".exe", string.Empty))
                     .Distinct()
                     .OrderBy(name => name));

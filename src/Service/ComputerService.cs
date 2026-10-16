@@ -606,7 +606,7 @@ namespace WinMemoryCleaner
                 if (!SetIncreasePrivilege(Constants.Windows.Privilege.SeDebugName))
                     throw new Exception(string.Format(Localizer.Culture, Localizer.String.ErrorAdminPrivilegeRequired, Constants.Windows.Privilege.SeDebugName));
 
-                var processes = Process.GetProcesses().Where(process => process is not null && !exclusionList.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase));
+                var processes = Process.GetProcesses().Where(process => process is not null && !ProcessExclusion.IsExcluded(process.ProcessName, exclusionList));
 
                 foreach (var process in processes)
                 {
