@@ -249,18 +249,26 @@
                           Grid.Row="0"
                           Header="{Binding Path=(local:Localizer.String).MemoryAreas}"
                           Margin="5, 5, 5, 0">
-                    <ItemsControl ItemsSource="{Binding MemoryAreaItems}"
-                                  VerticalAlignment="Top">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox Content="{Binding Name}"
-                                          IsChecked="{Binding Value, Mode=TwoWay}"
-                                          IsEnabled="{Binding IsEnabled}"
-                                          Margin="0, 0, 0, 3"
-                                          VerticalAlignment="Center" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <StackPanel VerticalAlignment="Top">
+                        <!-- Profile -->
+                        <ComboBox AutomationProperties.Name="{Binding Path=(local:Localizer.String).MemoryAreas}"
+                                  DisplayMemberPath="Value"
+                                  ItemsSource="{Binding ProfileItems}"
+                                  Margin="0, 0, 0, 5"
+                                  SelectedValue="{Binding SelectedProfile, Mode=TwoWay}"
+                                  SelectedValuePath="Key" />
+                        <ItemsControl ItemsSource="{Binding MemoryAreaItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Name}"
+                                              IsChecked="{Binding Value, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsEnabled}"
+                                              Margin="0, 0, 0, 3"
+                                              VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </GroupBox>
                 <!-- Optimization Hotkey -->
                 <GroupBox Grid.Column="0"

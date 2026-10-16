@@ -26,6 +26,7 @@ namespace WinMemoryCleaner
         private string _no;
         private string _optimizationHotkey, _optimize, _optimizeOnMiddleMouseClick, _optimizing;
         private string _physicalMemory, _processExclusionList;
+        private string _profileAggressive, _profileBalanced, _profileCustom, _profileLight;
         private string _reason, _registryCache, _remove, _reset, _resetCommand, _resetConfirmation, _runOnLowPriority, _runOnStartup;
         private string _schedule, _seconds, _settings, _showMemoryUsage, _showOptimizationNotifications, _showVirtualMemory, _standbyList, _standbyListLowPriority, _startMinimized, _systemFileCache;
         private string _text, _trayIcon;
@@ -218,6 +219,34 @@ namespace WinMemoryCleaner
         {
             get { return _help; }
             private set { _help = value.Capitalize(); }
+        }
+
+        [DataMember]
+        public string ProfileAggressive
+        {
+            get { return _profileAggressive; }
+            private set { _profileAggressive = value.Capitalize(); }
+        }
+
+        [DataMember]
+        public string ProfileBalanced
+        {
+            get { return _profileBalanced; }
+            private set { _profileBalanced = value.Capitalize(); }
+        }
+
+        [DataMember]
+        public string ProfileCustom
+        {
+            get { return _profileCustom; }
+            private set { _profileCustom = value.Capitalize(); }
+        }
+
+        [DataMember]
+        public string ProfileLight
+        {
+            get { return _profileLight; }
+            private set { _profileLight = value.Capitalize(); }
         }
 
         [DataMember]

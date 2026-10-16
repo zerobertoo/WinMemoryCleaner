@@ -700,6 +700,7 @@ namespace WinMemoryCleaner
                     RaisePropertyChanged();
                     RaisePropertyChanged(() => CanOptimize);
                     RaisePropertyChanged(() => MemoryAreaItems);
+                    RaisePropertyChanged(() => SelectedProfile);
                 }
                 finally
                 {
@@ -715,6 +716,75 @@ namespace WinMemoryCleaner
         /// The memory usage thresholds.
         /// </value>
         public List<byte> MemoryUsageThresholds { get; private set; }
+
+        /// <summary>
+        /// Áreas suportadas por este sistema (limita o que os perfis marcam)
+        /// </summary>
+        private Enums.Memory.Areas SupportedMemoryAreas
+        {
+            get
+            {
+                var os = Computer.OperatingSystem;
+                var supported = Enums.Memory.Areas.None;
+
+                if (os.HasCombinedPageList) supported |= Enums.Memory.Areas.CombinedPageList;
+                if (os.HasModifiedFileCache) supported |= Enums.Memory.Areas.ModifiedFileCache;
+                if (os.HasModifiedPageList) supported |= Enums.Memory.Areas.ModifiedPageList;
+                if (os.HasRegistryHive) supported |= Enums.Memory.Areas.RegistryCache;
+                if (os.HasStandbyList) supported |= Enums.Memory.Areas.StandbyList | Enums.Memory.Areas.StandbyListLowPriority;
+                if (os.HasSystemFileCache) supported |= Enums.Memory.Areas.SystemFileCache;
+                if (os.HasWorkingSet) supported |= Enums.Memory.Areas.WorkingSet;
+
+                return supported;
+            }
+        }
+
+        /// <summary>
+        /// Perfis para o seletor (nome localizado); "personalizado" aparece como valor selecionado quando as áreas não casam com nenhum
+        /// </summary>
+        public List<KeyValuePair<OptimizationProfile.Kind, string>> ProfileItems
+        {
+            get
+            {
+                return new List<KeyValuePair<OptimizationProfile.Kind, string>>
+                {
+                    new KeyValuePair<OptimizationProfile.Kind, string>(OptimizationProfile.Kind.Light, Localizer.String.ProfileLight),
+                    new KeyValuePair<OptimizationProfile.Kind, string>(OptimizationProfile.Kind.Balanced, Localizer.String.ProfileBalanced),
+                    new KeyValuePair<OptimizationProfile.Kind, string>(OptimizationProfile.Kind.Aggressive, Localizer.String.ProfileAggressive),
+                    new KeyValuePair<OptimizationProfile.Kind, string>(OptimizationProfile.Kind.Custom, Localizer.String.ProfileCustom)
+                };
+            }
+        }
+
+        /// <summary>
+        /// Perfil atual (deduzido das áreas marcadas); escolher um perfil marca as áreas correspondentes
+        /// </summary>
+        public OptimizationProfile.Kind SelectedProfile
+        {
+            get { return OptimizationProfile.Detect(MemoryAreas, SupportedMemoryAreas); }
+            set
+            {
+                if (value == OptimizationProfile.Kind.Custom)
+                    return;
+
+                try
+                {
+                    IsBusy = true;
+
+                    Settings.MemoryAreas = OptimizationProfile.GetAreas(value, SupportedMemoryAreas);
+                    Settings.Save();
+
+                    RaisePropertyChanged();
+                    RaisePropertyChanged(() => MemoryAreas);
+                    RaisePropertyChanged(() => CanOptimize);
+                    RaisePropertyChanged(() => MemoryAreaItems);
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the optimization key.
