@@ -1,3 +1,9 @@
+### 3.2.1
+
+**2026-10-15**
+
+- Corrigida a limpeza de memória, que deixou de funcionar na 3.2.0: a chamada nativa `NtSetSystemInformation` falhava por entry point incorreto e deixava de esvaziar o conjunto de trabalho, a lista de espera e demais áreas
+
 ### 3.2.0
 
 **2026-10-15**

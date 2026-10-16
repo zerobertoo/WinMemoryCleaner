@@ -11,7 +11,7 @@ using WinMemoryCleaner;
 [assembly: AssemblyKeyFile(Constants.App.KeyFile)]
 [assembly: AssemblyProduct(Constants.App.Name)]
 [assembly: AssemblyTitle(Constants.App.Title)]
-[assembly: AssemblyVersion("3.2.0.0")]
+[assembly: AssemblyVersion("3.2.1.0")]
 [assembly: ComVisible(false)]
 [assembly: Guid(Constants.App.Id)]
 [assembly: NeutralResourcesLanguage(Constants.Windows.Locale.Name.English)]
