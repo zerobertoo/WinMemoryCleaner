@@ -32,6 +32,7 @@ namespace WinMemoryCleaner
 
             public static class CommandLineArgument
             {
+                public const string DryRun = "DryRun";
                 public const string Install = "Install";
                 public const string Reset = "Reset";
                 public const string Service = "Service";

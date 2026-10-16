@@ -535,6 +535,18 @@ namespace WinMemoryCleaner
                         break;
 
                     case Enums.StartupType.Silent:
+                        if (parsedArguments.DryRun)
+                        {
+                            // Simulação: só relata o que rodaria
+                            Logger.EnableConsoleOutput();
+
+                            foreach (var area in DependencyInjection.Container.Resolve<IComputerService>().DryRun(memoryAreas).Areas)
+                                Logger.Information(area.Name + ": " + (area.Succeeded ? "would run" : "would fail - " + area.Error));
+
+                            Shutdown();
+                            break;
+                        }
+
                         DependencyInjection.Container.Resolve<IComputerService>().Optimize(Enums.Memory.Optimization.Reason.Manual, memoryAreas);
 
                         Shutdown();

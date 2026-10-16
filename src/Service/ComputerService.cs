@@ -206,6 +206,46 @@ namespace WinMemoryCleaner
         }
 
         /// <summary>
+        /// Simula a otimização: informa, por área, se ela seria executada neste sistema (versão do Windows e privilégio), sem tocar na memória
+        /// </summary>
+        /// <param name="areas">Memory areas</param>
+        /// <returns>Uma entrada por área; <see cref="OptimizationAreaResult.Error" /> traz o motivo quando não seria executada</returns>
+        public OptimizationResult DryRun(Enums.Memory.Areas areas)
+        {
+            var result = new OptimizationResult();
+            var workingSetPrivilege = Settings.GetProcessExclusionSnapshot().Any() ? Constants.Windows.Privilege.SeDebugName : Constants.Windows.Privilege.SeProfSingleProcessName;
+
+            var checks = new List<(Enums.Memory.Areas Flags, string Name, bool Supported, string Privilege)>
+            {
+                (Enums.Memory.Areas.WorkingSet, Localizer.String.WorkingSet, OperatingSystem.HasWorkingSet, workingSetPrivilege),
+                (Enums.Memory.Areas.SystemFileCache, Localizer.String.SystemFileCache, OperatingSystem.HasSystemFileCache, Constants.Windows.Privilege.SeIncreaseQuotaName),
+                (Enums.Memory.Areas.ModifiedPageList, Localizer.String.ModifiedPageList, OperatingSystem.HasModifiedPageList, Constants.Windows.Privilege.SeProfSingleProcessName),
+                (Enums.Memory.Areas.StandbyList, Localizer.String.StandbyList, OperatingSystem.HasStandbyList, Constants.Windows.Privilege.SeProfSingleProcessName),
+                (Enums.Memory.Areas.StandbyListLowPriority, Localizer.String.StandbyListLowPriority, OperatingSystem.HasStandbyList, Constants.Windows.Privilege.SeProfSingleProcessName),
+                (Enums.Memory.Areas.CombinedPageList, Localizer.String.CombinedPageList, OperatingSystem.HasCombinedPageList, Constants.Windows.Privilege.SeProfSingleProcessName),
+                (Enums.Memory.Areas.RegistryCache, Localizer.String.RegistryCache, OperatingSystem.HasRegistryHive, null),
+                (Enums.Memory.Areas.ModifiedFileCache, Localizer.String.ModifiedFileCache, OperatingSystem.HasModifiedFileCache, null)
+            };
+
+            foreach (var check in checks)
+            {
+                if ((areas & check.Flags) == 0)
+                    continue;
+
+                var area = new OptimizationAreaResult { Name = check.Name };
+
+                if (!check.Supported)
+                    area.Error = string.Format(Localizer.Culture, Localizer.String.ErrorMemoryAreaOptimizationNotSupported, check.Name);
+                else if (check.Privilege is not null && !SetIncreasePrivilege(check.Privilege))
+                    area.Error = string.Format(Localizer.Culture, Localizer.String.ErrorAdminPrivilegeRequired, check.Privilege);
+
+                result.Areas.Add(area);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Executa a otimização de cada área, isolando falhas por área
         /// </summary>
         private OptimizationResult OptimizeAreas(Enums.Memory.Optimization.Reason reason, Enums.Memory.Areas areas)

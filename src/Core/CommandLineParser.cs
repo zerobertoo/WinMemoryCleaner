@@ -24,6 +24,11 @@ namespace WinMemoryCleaner
             public Enums.StartupType StartupType { get; set; } = Enums.StartupType.App;
 
             /// <summary>
+            /// Indica que o argumento <c>/DryRun</c> foi recebido: só simula, sem otimizar
+            /// </summary>
+            public bool DryRun { get; set; }
+
+            /// <summary>
             /// Indica que o argumento com a versão atual foi recebido (o app acabou de ser atualizado)
             /// </summary>
             public bool UpdatedToCurrentVersion { get; set; }
@@ -70,6 +75,9 @@ namespace WinMemoryCleaner
 
                 if (argument.Equals(Constants.App.CommandLineArgument.Uninstall, StringComparison.OrdinalIgnoreCase))
                     result.StartupType = Enums.StartupType.Uninstallation;
+
+                if (argument.Equals(Constants.App.CommandLineArgument.DryRun, StringComparison.OrdinalIgnoreCase))
+                    result.DryRun = true;
 
                 if (argument.Equals(currentVersion))
                     result.UpdatedToCurrentVersion = true;

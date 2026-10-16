@@ -52,6 +52,25 @@ namespace WinMemoryCleaner.Test
         }
 
         [Test]
+        public void DryRunArgument_IsFlaggedAndKeepsSilentMode()
+        {
+            var result = Parse("/WorkingSet", "-dryrun");
+
+            Assert.IsTrue(result.DryRun);
+            Assert.AreEqual(Enums.StartupType.Silent, result.StartupType);
+            Assert.IsFalse(Parse("/WorkingSet").DryRun);
+        }
+
+        [Test]
+        public void DryRun_OnComputerService_ListsOnlyRequestedAreas()
+        {
+            var result = new ComputerService().DryRun(Enums.Memory.Areas.RegistryCache | Enums.Memory.Areas.WorkingSet);
+
+            Assert.AreEqual(2, result.Areas.Count);
+            Assert.IsEmpty(new ComputerService().DryRun(Enums.Memory.Areas.None).Areas);
+        }
+
+        [Test]
         public void VersionArgument_FlagsUpdate()
         {
             Assert.IsTrue(Parse("1.2.3.4").UpdatedToCurrentVersion);
