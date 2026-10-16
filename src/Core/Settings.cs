@@ -33,7 +33,7 @@ namespace WinMemoryCleaner
         public static int AutoOptimizationMemoryUsage { get; set; }
 
         /// <summary>
-        /// Adia a otimização automática da GUI enquanto o usuário está ativo (sem opção na UI; chave de registro)
+        /// Adia a otimização automática da GUI enquanto o usuário está ativo (o serviço não usa; chave de registro e opção nas configurações)
         /// </summary>
         public static bool AutoOptimizationOnlyWhenIdle { get; set; }
 
@@ -141,7 +141,8 @@ namespace WinMemoryCleaner
             MemoryAreas = Enums.Memory.Areas.CombinedPageList | Enums.Memory.Areas.ModifiedFileCache | Enums.Memory.Areas.ModifiedPageList | Enums.Memory.Areas.RegistryCache | Enums.Memory.Areas.StandbyList | Enums.Memory.Areas.SystemFileCache | Enums.Memory.Areas.WorkingSet;
             OptimizationKey = Key.M;
             OptimizationModifiers = ModifierKeys.Control | ModifierKeys.Shift;
-            ProcessExclusionList = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+            lock (_exclusionListLock)
+                ProcessExclusionList = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
             RunOnPriority = Enums.Priority.Low;
             RunOnStartup = false;
             ShowOptimizationNotifications = true;
@@ -171,7 +172,7 @@ namespace WinMemoryCleaner
                     if (key is not null)
                     {
                         foreach (var name in key.GetValueNames())
-                            ProcessExclusionList.Add(name.RemoveWhitespaces().Replace(".exe", string.Empty).ToLower(_culture));
+                            AddProcessExclusion(name.RemoveWhitespaces().Replace(".exe", string.Empty).ToLower(_culture));
                     }
                 }
 

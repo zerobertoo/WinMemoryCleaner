@@ -178,7 +178,7 @@ namespace WinMemoryCleaner
         /// </summary>
         internal static string BuildForwardedArguments(string[] args)
         {
-            return string.Join(" ", (args ?? Array.Empty<string>()).Where(argument => Regex.IsMatch(argument ?? string.Empty, @"^/?[A-Za-z0-9._]+$")));
+            return string.Join(" ", (args ?? Array.Empty<string>()).Where(argument => Regex.IsMatch(argument ?? string.Empty, @"^/?[A-Za-z0-9._]+\z")));
         }
 
         private static void Reset()

@@ -80,7 +80,7 @@ namespace WinMemoryCleaner.Test
         [Test]
         public void BuildForwardedArguments_DropsArgumentsThatCouldInjectCommands()
         {
-            var result = Updater.BuildForwardedArguments(new[] { "/ok", "a&calc", "x|y", "\"quoted\"", "/a b", "%PATH%", null });
+            var result = Updater.BuildForwardedArguments(new[] { "/ok", "a&calc", "x|y", "\"quoted\"", "/a b", "%PATH%", "/ok\n", null });
 
             Assert.AreEqual("/ok", result);
         }
