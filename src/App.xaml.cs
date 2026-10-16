@@ -398,41 +398,15 @@ namespace WinMemoryCleaner
             {
                 Initialize();
 
-                var commandLineArguments = startupEvent != null ? startupEvent.Args.Select(arg => arg.Replace("-", "/").Trim()).ToArray() : null;
-                var memoryAreas = Enums.Memory.Areas.None;
+                var commandLineArguments = startupEvent != null ? CommandLineParser.Normalize(startupEvent.Args) : null;
+                var parsedArguments = CommandLineParser.Parse(commandLineArguments, Version.ToString());
+                var memoryAreas = parsedArguments.MemoryAreas;
 
-                if (commandLineArguments != null)
-                {
-                    // Process command‑line arguments
-                    foreach (var argument in commandLineArguments.Select(arg => arg.Replace("/", string.Empty)))
-                    {
-                        // Memory areas to optimize
-                        Enums.Memory.Areas area;
+                startupType = parsedArguments.StartupType;
 
-                        if (Enum.TryParse(argument, true, out area))
-                            memoryAreas |= area;
-
-                        // Startup Type
-                        if (memoryAreas != Enums.Memory.Areas.None)
-                            startupType = Enums.StartupType.Silent;
-
-                        if (argument.Equals(Constants.App.CommandLineArgument.Install, StringComparison.OrdinalIgnoreCase))
-                            startupType = Enums.StartupType.Installation;
-
-                        if (argument.Equals(Constants.App.CommandLineArgument.Reset, StringComparison.OrdinalIgnoreCase))
-                            startupType = Enums.StartupType.Reset;
-
-                        if (argument.Equals(Constants.App.CommandLineArgument.Service, StringComparison.OrdinalIgnoreCase))
-                            startupType = Enums.StartupType.Service;
-
-                        if (argument.Equals(Constants.App.CommandLineArgument.Uninstall, StringComparison.OrdinalIgnoreCase))
-                            startupType = Enums.StartupType.Uninstallation;
-
-                        // Notify version update
-                        if (argument.Equals(Version.ToString()))
-                            _notifications.Add(string.Format(Localizer.Culture, Localizer.String.UpdatedToVersion, string.Format(Localizer.Culture, Constants.App.VersionFormat, Version.Major, Version.Minor, Version.Build)));
-                    }
-                }
+                // Notify version update
+                if (parsedArguments.UpdatedToCurrentVersion)
+                    _notifications.Add(string.Format(Localizer.Culture, Localizer.String.UpdatedToVersion, string.Format(Localizer.Culture, Constants.App.VersionFormat, Version.Major, Version.Minor, Version.Build)));
 
                 // Atualização automática só no modo GUI: nunca no serviço (LocalSystem), na instalação ou na execução silenciosa
                 if (startupType == Enums.StartupType.App && commandLineArguments != null)

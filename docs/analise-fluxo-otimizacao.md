@@ -274,4 +274,4 @@ A-01, A-02, A-03, A-04, A-05 (NTSTATUS convertido via `RtlNtStatusToDosError` em
 - **M-05** (tamanho das structs): não alterado. Com `Pack = 1`, trocar `Flags` para `uint` reduziria `MemoryCombineInformationEx` a 20 bytes e quebraria o x64 que hoje coincide com os 24 nativos; o tamanho de `SystemFileCacheInformation64` precisa ser validado contra o WDK em máquina real.
 - **M-12, M-14, M-15, M-16** e a maioria dos baixos.
 - **Efeito colateral do `net start`:** se o serviço estava instalado mas parado de propósito, o update o inicia.
-- Funções puras para `ParseArgs`/`ShouldOptimize` (seção 5, itens 1-2) e features F-xx seguem como roadmap.
+- Funções puras de `ParseArgs`, `ShouldOptimize` e args do `sc` extraídas (`CommandLineParser`, `AutoOptimizationTrigger`, `WinServiceInstaller.BuildCreateArguments`); features F-xx seguem como roadmap.

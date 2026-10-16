@@ -24,11 +24,7 @@ namespace WinMemoryCleaner
                 !executablePath.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows), StringComparison.OrdinalIgnoreCase))
                 Logger.Warning("The service runs as LocalSystem from '" + executablePath + "'. Install the executable under Program Files so that standard users cannot replace it.");
 
-            RunServiceControl("create", Constants.App.Name,
-                "binPath=", "\"" + executablePath + "\" /Service",
-                "start=", "delayed-auto",
-                "DisplayName=", Constants.App.Title,
-                "obj=", "LocalSystem");
+            RunServiceControl(BuildCreateArguments(executablePath));
 
             RunServiceControl("description", Constants.App.Name, Constants.App.Repository.Uri.ToString());
 
@@ -79,6 +75,22 @@ namespace WinMemoryCleaner
             var currentProcessId = Process.GetCurrentProcess().Id;
 
             KillProcesses(Process.GetProcessesByName(Constants.App.Name).Where(process => process.Id != currentProcessId));
+        }
+
+        /// <summary>
+        /// Monta os argumentos do <c>sc create</c> (função pura, testável sem admin)
+        /// </summary>
+        /// <param name="executablePath">Caminho do executável do serviço</param>
+        public static string[] BuildCreateArguments(string executablePath)
+        {
+            return new[]
+            {
+                "create", Constants.App.Name,
+                "binPath=", "\"" + executablePath + "\" /" + Constants.App.CommandLineArgument.Service,
+                "start=", "delayed-auto",
+                "DisplayName=", Constants.App.Title,
+                "obj=", "LocalSystem"
+            };
         }
 
         private static void KillProcesses(System.Collections.Generic.IEnumerable<Process> processes)
