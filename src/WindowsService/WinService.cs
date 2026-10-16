@@ -14,6 +14,7 @@ namespace WinMemoryCleaner
         private readonly IComputerService _computerService;
         private DateTimeOffset _lastAutoOptimizationByInterval = DateTimeOffset.Now;
         private DateTimeOffset _lastAutoOptimizationByMemoryUsage = DateTimeOffset.Now;
+        private readonly AdaptiveCooldown _memoryUsageCooldown = new AdaptiveCooldown();
         private readonly Timer _timer = new Timer(60000);
         private int _isTickRunning;
 
@@ -144,17 +145,28 @@ namespace WinMemoryCleaner
             // Update memory info
             _computer.Memory = _computerService.Memory;
 
-            var reason = AutoOptimizationTrigger.Decide(DateTimeOffset.Now, Settings.AutoOptimizationInterval, _lastAutoOptimizationByInterval, Settings.AutoOptimizationMemoryUsage, _computer.Memory.Physical.Free.Percentage, _lastAutoOptimizationByMemoryUsage, Constants.App.AutoOptimizationMemoryUsageInterval);
+            var reason = AutoOptimizationTrigger.Decide(DateTimeOffset.Now, Settings.AutoOptimizationInterval, _lastAutoOptimizationByInterval, Settings.AutoOptimizationMemoryUsage, _computer.Memory.Physical.Free.Percentage, _lastAutoOptimizationByMemoryUsage, _memoryUsageCooldown.GetMinutes(Constants.App.AutoOptimizationMemoryUsageInterval));
 
             if (reason is null)
                 return;
 
+            var freeBefore = _computer.Memory.Physical.Free.Bytes;
+
             DependencyInjection.Container.Resolve<IComputerService>().Optimize(reason.Value, Settings.MemoryAreas);
 
             if (reason == Enums.Memory.Optimization.Reason.Schedule)
+            {
                 _lastAutoOptimizationByInterval = DateTimeOffset.Now;
+            }
             else
+            {
                 _lastAutoOptimizationByMemoryUsage = DateTimeOffset.Now;
+
+                // Backoff: otimização por pouca memória sem ganho espaça as próximas tentativas
+                var after = _computerService.Memory.Physical;
+
+                _memoryUsageCooldown.Record((ulong)Math.Max(0, after.Free.Bytes - freeBefore), (ulong)Math.Max(0, after.Total.Bytes));
+            }
         }
     }
 }

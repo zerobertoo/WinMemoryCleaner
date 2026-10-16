@@ -28,6 +28,7 @@ namespace WinMemoryCleaner
         private bool _isReiniziliating;
         private DateTimeOffset _lastAutoOptimizationByInterval = DateTimeOffset.Now;
         private DateTimeOffset _lastAutoOptimizationByMemoryUsage = DateTimeOffset.Now;
+        private readonly AdaptiveCooldown _memoryUsageCooldown = new AdaptiveCooldown();
         private readonly object _lockObject = new object();
 
         // 1 enquanto há uma otimização enfileirada ou em execução (check-then-act atômico entre gatilhos)
@@ -1639,7 +1640,7 @@ namespace WinMemoryCleaner
                     {
                         if (CanOptimize)
                         {
-                            var reason = AutoOptimizationTrigger.Decide(DateTimeOffset.Now, Settings.AutoOptimizationInterval, _lastAutoOptimizationByInterval, Settings.AutoOptimizationMemoryUsage, Computer.Memory.Physical.Free.Percentage, _lastAutoOptimizationByMemoryUsage, Constants.App.AutoOptimizationMemoryUsageInterval);
+                            var reason = AutoOptimizationTrigger.Decide(DateTimeOffset.Now, Settings.AutoOptimizationInterval, _lastAutoOptimizationByInterval, Settings.AutoOptimizationMemoryUsage, Computer.Memory.Physical.Free.Percentage, _lastAutoOptimizationByMemoryUsage, _memoryUsageCooldown.GetMinutes(Constants.App.AutoOptimizationMemoryUsageInterval));
 
                             // Usuário ativo: adia sem atualizar os carimbos, a decisão é refeita no próximo ciclo (60 s)
                             if (reason is not null && !AutoOptimizationTrigger.ShouldDefer(Settings.AutoOptimizationOnlyWhenIdle, AutoOptimizationTrigger.GetIdleTime(), TimeSpan.FromMinutes(5)))
@@ -1766,6 +1767,10 @@ namespace WinMemoryCleaner
                     // Update memory info
                     Computer.Memory = _computerService.Memory;
                     RaisePropertyChanged(() => Computer);
+
+                    // Backoff: otimizações por pouca memória sem ganho espaçam as próximas tentativas
+                    if (reason == Enums.Memory.Optimization.Reason.LowMemory)
+                        _memoryUsageCooldown.Record((ulong)Math.Max(0, Computer.Memory.Physical.Free.Bytes - tempPhysicalAvailable), (ulong)Math.Max(0, Computer.Memory.Physical.Total.Bytes));
 
                     // Notification
                     if (Settings.ShowOptimizationNotifications)
