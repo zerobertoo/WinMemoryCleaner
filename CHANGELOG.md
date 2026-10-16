@@ -1,3 +1,21 @@
+### 3.2.0
+
+**2026-10-15**
+
+- Nova interface com WPF-UI (Fluent): mostrador de memória, temas claro e escuro e novo ícone
+- Otimização com resultado por área: falha em uma área não impede as demais, e a notificação lista as áreas que falharam
+- Mutex global entre janela, serviço e linha de comando: só uma otimização roda por vez
+- Corrigidos erros nativos, a medição da memória liberada e a concorrência entre os gatilhos automáticos
+- Atualizador: verifica o SHA-256 do executável baixado, usa diretório temporário exclusivo, sanitiza os argumentos e respeita a opção de atualização automática
+- Atualização do serviço: ele só é parado e reiniciado se estava em execução
+- Backoff adaptativo: a otimização por pouca memória espaça as tentativas quando não libera ganho
+- Nova opção para otimizar automaticamente só quando o computador está ocioso (`AutoOptimizationOnlyWhenIdle`)
+- Histórico das últimas otimizações (menu de ajuda, item Histórico)
+- Lista de exclusão aceita padrões com `*` e `?`
+- Perfis Leve, Equilibrado e Agressivo no cartão Áreas de memória
+- Novo argumento `/DryRun` para simular a otimização e informar o que rodaria por área
+- README com a linha de comando e as configurações extras
+
 ### 3.1.0
 
 **2026-10-15**
