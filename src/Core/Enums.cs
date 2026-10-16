@@ -15,7 +15,8 @@ namespace WinMemoryCleaner
             {
                 None,
                 Yes,
-                No
+                No,
+                Close
             }
         }
 

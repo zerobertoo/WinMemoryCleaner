@@ -19,7 +19,7 @@ namespace WinMemoryCleaner
         private string _error, _errorAdminPrivilegeRequired, _errorCanNotSaveLog, _errorMemoryAreaOptimizationNotSupported, _errorResetCommand, _everyHour, _exit, _expand;
         private string _free;
         private string _garbageCollector;
-        private string _help, _hotkeyIsInUseByOperatingSystem;
+        private string _help, _history, _hotkeyIsInUseByOperatingSystem;
         private string _invalid;
         private string _lowMemory;
         private string _manual, _memoryAreas, _memoryOptimized, _memoryUsage, _minimize, _modifiedFileCache, _modifiedPageList;
@@ -218,6 +218,13 @@ namespace WinMemoryCleaner
         {
             get { return _help; }
             private set { _help = value.Capitalize(); }
+        }
+
+        [DataMember]
+        public string History
+        {
+            get { return _history; }
+            private set { _history = value.Capitalize(); }
         }
 
         [DataMember]

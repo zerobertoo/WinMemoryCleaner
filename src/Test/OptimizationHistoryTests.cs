@@ -73,6 +73,23 @@ namespace WinMemoryCleaner.Test
         }
 
         [Test]
+        public void Format_ShowsNewestFirstLimitedAndMarksFailures()
+        {
+            var entries = new[]
+            {
+                new OptimizationHistoryEntry { Timestamp = DateTimeOffset.Now, Reason = "old", ReleasedBytes = 1024 },
+                new OptimizationHistoryEntry { Timestamp = DateTimeOffset.Now, Reason = "new", ReleasedBytes = 2048, FailedAreas = new[] { "Standby" } }
+            };
+
+            var lines = OptimizationHistory.Format(entries, 1, System.Globalization.CultureInfo.InvariantCulture).Split(Environment.NewLine);
+
+            Assert.AreEqual(1, lines.Length);
+            StringAssert.Contains("new", lines[0]);
+            StringAssert.Contains("2 KB", lines[0]);
+            StringAssert.EndsWith("| Standby", lines[0]);
+        }
+
+        [Test]
         public void FromResult_SplitsAreasAndClampsNegativeRelease()
         {
             var result = new OptimizationResult();

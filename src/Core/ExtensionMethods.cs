@@ -107,6 +107,9 @@ namespace WinMemoryCleaner
                 case Enums.Dialog.Button.No:
                     return new KeyValuePair<string, bool?>(Localizer.String.No, false);
 
+                case Enums.Dialog.Button.Close:
+                    return new KeyValuePair<string, bool?>(Localizer.String.Close, true);
+
                 default:
                     throw new NotImplementedException();
             }

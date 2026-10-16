@@ -25,6 +25,7 @@
   "Free": "свободно",
   "GarbageCollector": "сборщик мусора",
   "Help": "помощь",
+  "History": "history",
   "HotkeyIsInUseByOperatingSystem": "горячая клавиша ({0}) уже используется операционной системой",
   "Invalid": "недопустимо",
   "LowMemory": "мало памяти",

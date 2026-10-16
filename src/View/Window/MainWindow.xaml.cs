@@ -227,6 +227,18 @@ namespace WinMemoryCleaner
         }
 
         /// <summary>
+        /// Called when the history menu item is clicked: shows the latest optimizations.
+        /// </summary>
+        private void OnHistoryClick(object sender, RoutedEventArgs e)
+        {
+            var text = OptimizationHistory.Format(OptimizationHistory.Read(), 10, Localizer.Culture);
+
+            new MessageDialog(this, string.IsNullOrEmpty(text) ? "-" : text, Enums.Dialog.Button.Close).ShowDialog();
+
+            SetFocusTo(Optimize);
+        }
+
+        /// <summary>
         /// Called when the reset settings to default configuration menu item is clicked.
         /// </summary>
         /// <param name="sender">The sender.</param>

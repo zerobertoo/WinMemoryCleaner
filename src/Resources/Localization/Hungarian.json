@@ -25,6 +25,7 @@
   "Free": "szabad memória",
   "GarbageCollector": "szemétgyűjtő",
   "Help": "súgó",
+  "History": "history",
   "HotkeyIsInUseByOperatingSystem": "a gyorsbillentyűt ({0}) jelenleg a rendszer használja",
   "Invalid": "érvénytelen",
   "LowMemory": "kevés memória",

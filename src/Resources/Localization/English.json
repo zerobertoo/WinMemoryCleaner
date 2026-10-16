@@ -25,6 +25,7 @@
   "Free": "free",
   "GarbageCollector": "garbage collector",
   "Help": "help",
+  "History": "history",
   "HotkeyIsInUseByOperatingSystem": "the hotkey ({0}) is in use by the operating system",
   "Invalid": "invalid",
   "LowMemory": "low memory",

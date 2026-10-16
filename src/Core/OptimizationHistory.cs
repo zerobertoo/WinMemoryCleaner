@@ -107,6 +107,28 @@ namespace WinMemoryCleaner
         }
 
         /// <summary>
+        /// Formata as últimas entradas (mais recente primeiro), uma por linha: data | motivo | liberado | áreas com falha
+        /// </summary>
+        /// <param name="entries">Entradas, da mais antiga para a mais recente</param>
+        /// <param name="count">Quantidade máxima de linhas</param>
+        /// <param name="culture">Cultura para data e números</param>
+        public static string Format(IEnumerable<OptimizationHistoryEntry> entries, int count, System.Globalization.CultureInfo culture)
+        {
+            var lines = entries.Reverse().Take(count).Select(entry =>
+            {
+                var released = entry.ReleasedBytes.ToMemoryUnit();
+                var line = string.Format(culture, "{0:g} | {1} | {2:0.#} {3}", entry.Timestamp.LocalDateTime, entry.Reason, released.Key, released.Value);
+
+                if (entry.FailedAreas.Length > 0)
+                    line += " | " + string.Join(", ", entry.FailedAreas);
+
+                return line;
+            });
+
+            return string.Join(Environment.NewLine, lines);
+        }
+
+        /// <summary>
         /// Converte o resultado de uma otimização em entrada de histórico
         /// </summary>
         public static OptimizationHistoryEntry FromResult(OptimizationResult result, string reason, long releasedBytes, DateTimeOffset now)

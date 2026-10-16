@@ -25,6 +25,7 @@
   "Free": "可用",
   "GarbageCollector": "垃圾回收器",
   "Help": "帮助",
+  "History": "history",
   "HotkeyIsInUseByOperatingSystem": "操作系统正在使用热键 ({0})",
   "Invalid": "无效的",
   "LowMemory": "内存不足",
