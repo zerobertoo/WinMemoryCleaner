@@ -188,7 +188,12 @@ namespace WinMemoryCleaner
 
             try
             {
-                return OptimizeAreas(reason, areas);
+                var freeBefore = Memory.Physical.Free.Bytes;
+                var result = OptimizeAreas(reason, areas);
+
+                OptimizationHistory.Append(OptimizationHistory.FromResult(result, reason.GetString(), Memory.Physical.Free.Bytes - freeBefore, DateTimeOffset.Now));
+
+                return result;
             }
             finally
             {
