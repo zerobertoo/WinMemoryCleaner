@@ -1639,25 +1639,16 @@ namespace WinMemoryCleaner
                     {
                         if (CanOptimize)
                         {
-                            // Interval
-                            if (Settings.AutoOptimizationInterval > 0 &&
-                                DateTimeOffset.Now.Subtract(_lastAutoOptimizationByInterval).TotalHours >= Settings.AutoOptimizationInterval)
+                            var reason = AutoOptimizationTrigger.Decide(DateTimeOffset.Now, Settings.AutoOptimizationInterval, _lastAutoOptimizationByInterval, Settings.AutoOptimizationMemoryUsage, Computer.Memory.Physical.Free.Percentage, _lastAutoOptimizationByMemoryUsage, Constants.App.AutoOptimizationMemoryUsageInterval);
+
+                            if (reason is not null)
                             {
-                                OptimizeAsync(Enums.Memory.Optimization.Reason.Schedule);
+                                OptimizeAsync(reason.Value);
 
-                                _lastAutoOptimizationByInterval = DateTimeOffset.Now;
-                                continue;
-                            }
-
-                            // Memory usage
-                            if (Settings.AutoOptimizationMemoryUsage > 0 &&
-                                Computer.Memory.Physical.Free.Percentage < Settings.AutoOptimizationMemoryUsage &&
-                                DateTimeOffset.Now.Subtract(_lastAutoOptimizationByMemoryUsage).TotalMinutes >= Constants.App.AutoOptimizationMemoryUsageInterval)
-                            {
-                                OptimizeAsync(Enums.Memory.Optimization.Reason.LowMemory);
-
-                                _lastAutoOptimizationByMemoryUsage = DateTimeOffset.Now;
-                                continue;
+                                if (reason == Enums.Memory.Optimization.Reason.Schedule)
+                                    _lastAutoOptimizationByInterval = DateTimeOffset.Now;
+                                else
+                                    _lastAutoOptimizationByMemoryUsage = DateTimeOffset.Now;
                             }
                         }
                     }
