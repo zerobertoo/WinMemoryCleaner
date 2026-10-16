@@ -89,8 +89,7 @@ namespace WinMemoryCleaner
 
                 Process = new ProcessStartInfo
                 {
-                    // net stop/start: libera o exe travado pelo serviço (se instalado) em vez de matá-lo sem parada ordenada
-                    Arguments = string.Format(CultureInfo.InvariantCulture, @"/c net stop ""{5}"" >nul 2>&1 & taskkill /f /im ""{0}"" >nul 2>&1 & move /y ""{1}"" ""{2}"" & rmdir ""{6}"" & net start ""{5}"" >nul 2>&1 & start """" ""{2}"" /{3} {4}", exe, temp, App.Path, newestVersion, BuildForwardedArguments(args), Constants.App.Name, tempDirectory),
+                    Arguments = BuildReplaceCommand(exe, temp, App.Path, newestVersion.ToString(), BuildForwardedArguments(args), Constants.App.Name, tempDirectory, IsServiceRunning()),
                     CreateNoWindow = true,
                     FileName = "cmd",
                     RedirectStandardError = false,
@@ -112,6 +111,35 @@ namespace WinMemoryCleaner
 
                 Reset();
             }
+        }
+
+        /// <summary>
+        /// Indica se o serviço está em execução (só nesse caso ele é parado e reiniciado na atualização).
+        /// </summary>
+        private static bool IsServiceRunning()
+        {
+            try
+            {
+                using (var controller = new System.ServiceProcess.ServiceController(Constants.App.Name))
+                    return controller.Status == System.ServiceProcess.ServiceControllerStatus.Running;
+            }
+            catch
+            {
+                // serviço não instalado
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Monta a linha de comando <c>cmd /c</c> que substitui o executável e o reabre (função pura).
+        /// </summary>
+        /// <param name="restartService">Se verdadeiro, para o serviço antes de trocar o exe e o inicia depois; se falso, não o toca (estava parado ou não instalado)</param>
+        public static string BuildReplaceCommand(string exe, string temp, string destination, string version, string forwardedArguments, string serviceName, string tempDirectory, bool restartService)
+        {
+            var stop = restartService ? string.Format(CultureInfo.InvariantCulture, @"net stop ""{0}"" >nul 2>&1 & ", serviceName) : string.Empty;
+            var start = restartService ? string.Format(CultureInfo.InvariantCulture, @"net start ""{0}"" >nul 2>&1 & ", serviceName) : string.Empty;
+
+            return string.Format(CultureInfo.InvariantCulture, @"/c {0}taskkill /f /im ""{1}"" >nul 2>&1 & move /y ""{2}"" ""{3}"" & rmdir ""{4}"" & {5}start """" ""{3}"" /{6} {7}", stop, exe, temp, destination, tempDirectory, start, version, forwardedArguments);
         }
 
         /// <summary>

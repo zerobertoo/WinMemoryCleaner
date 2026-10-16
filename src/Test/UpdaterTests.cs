@@ -41,6 +41,37 @@ namespace WinMemoryCleaner.Test
         }
 
         [Test]
+        public void BuildReplaceCommand_RestartsServiceOnlyWhenRequested()
+        {
+            var restart = Updater.BuildReplaceCommand("a.exe", "t", "d", "1.0", "", "Svc", "td", true);
+            var keep = Updater.BuildReplaceCommand("a.exe", "t", "d", "1.0", "", "Svc", "td", false);
+
+            StringAssert.Contains("net stop \"Svc\"", restart);
+            StringAssert.Contains("net start \"Svc\"", restart);
+            StringAssert.DoesNotContain("net stop", keep);
+            StringAssert.DoesNotContain("net start", keep);
+            StringAssert.Contains("move /y \"t\" \"d\"", keep);
+        }
+
+        [Test]
+        public void ProcessExclusionSnapshot_ReflectsAddAndRemove()
+        {
+            const string name = "wmc-test-process";
+
+            try
+            {
+                Assert.IsTrue(Settings.AddProcessExclusion(name));
+                CollectionAssert.Contains(Settings.GetProcessExclusionSnapshot(), name);
+                Assert.IsTrue(Settings.RemoveProcessExclusion(name));
+                CollectionAssert.DoesNotContain(Settings.GetProcessExclusionSnapshot(), name);
+            }
+            finally
+            {
+                Settings.RemoveProcessExclusion(name);
+            }
+        }
+
+        [Test]
         public void BuildForwardedArguments_KeepsSimpleArguments()
         {
             Assert.AreEqual("/WorkingSet /StandbyList", Updater.BuildForwardedArguments(new[] { "/WorkingSet", "/StandbyList" }));

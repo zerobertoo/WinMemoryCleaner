@@ -54,6 +54,35 @@ namespace WinMemoryCleaner
 
         public static SortedSet<string> ProcessExclusionList { get; private set; }
 
+        private static readonly object _exclusionListLock = new object();
+
+        /// <summary>
+        /// Cópia da lista de exclusão, segura para enumerar em qualquer thread
+        /// </summary>
+        public static string[] GetProcessExclusionSnapshot()
+        {
+            lock (_exclusionListLock)
+                return ProcessExclusionList.ToArray();
+        }
+
+        /// <summary>
+        /// Adiciona à lista de exclusão com exclusão mútua
+        /// </summary>
+        public static bool AddProcessExclusion(string process)
+        {
+            lock (_exclusionListLock)
+                return ProcessExclusionList.Add(process);
+        }
+
+        /// <summary>
+        /// Remove da lista de exclusão com exclusão mútua
+        /// </summary>
+        public static bool RemoveProcessExclusion(string process)
+        {
+            lock (_exclusionListLock)
+                return ProcessExclusionList.Remove(process);
+        }
+
         public static Enums.Priority RunOnPriority { get; set; }
 
         public static bool RunOnStartup { get; set; }
@@ -243,13 +272,15 @@ namespace WinMemoryCleaner
                 // Process Exclusion List
                 Registry.LocalMachine.DeleteSubKey(Constants.App.Registry.Key.ProcessExclusionList, false);
 
-                if (ProcessExclusionList.Any())
+                var exclusionList = GetProcessExclusionSnapshot();
+
+                if (exclusionList.Any())
                 {
                     using (var key = Registry.LocalMachine.CreateSubKey(Constants.App.Registry.Key.ProcessExclusionList))
                     {
                         if (key is not null)
                         {
-                            foreach (var process in ProcessExclusionList)
+                            foreach (var process in exclusionList)
                                 key.SetValue(process.RemoveWhitespaces().Replace(".exe", string.Empty).ToLower(_culture), string.Empty, RegistryValueKind.String);
                         }
                     }

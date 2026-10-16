@@ -270,7 +270,7 @@ A-01, A-02, A-03, A-04, A-05 (NTSTATUS convertido via `RtlNtStatusToDosError` em
 
 ### Pendente / não alterado
 
-- **A-10** (deadlock potencial no tray), **M-06** (`IsBusy` compartilhado), **M-07** (lista de exclusão sem sincronização), **M-09** (NotifyIcon fora da UI): exigem mexer no `NotificationService` e no modelo de `IsBusy`; sem como validar sem rodar a UI com admin.
+- **A-10** (deadlock potencial no tray), **M-06** (`IsBusy` compartilhado), **M-09** (NotifyIcon fora da UI): exigem mexer no `NotificationService` e no modelo de `IsBusy`; sem como validar sem rodar a UI com admin.
 - **M-05** (tamanho das structs): não alterado. Com `Pack = 1`, trocar `Flags` para `uint` reduziria `MemoryCombineInformationEx` a 20 bytes e quebraria o x64 que hoje coincide com os 24 nativos; o tamanho de `SystemFileCacheInformation64` precisa ser validado contra o WDK em máquina real.
 - **M-12, M-14, M-15, M-16** e a maioria dos baixos.
 - **Efeito colateral do `net start`:** se o serviço estava instalado mas parado de propósito, o update o inicia.
