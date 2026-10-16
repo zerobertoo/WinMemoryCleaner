@@ -82,7 +82,7 @@ namespace WinMemoryCleaner
         internal static extern bool LookupPrivilegeValue(string lpSystemName, string lpName, ref long lpLuid);
 
         [SuppressUnmanagedCodeSecurity]
-        [DllImport("ntdll.dll", SetLastError = true)]
+        [DllImport("ntdll.dll", EntryPoint = "NtSetSystemInformation", SetLastError = true)]
         private static extern int NtSetSystemInformationNative(int SystemInformationClass, IntPtr SystemInformation, uint SystemInformationLength);
 
         [DllImport("ntdll.dll")]
