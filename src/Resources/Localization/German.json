@@ -4,6 +4,7 @@
   "AlwaysOnTop": "immer im vordergrund",
   "AutoOptimization": "automatische optimierung",
   "AutoOptimizationInterval": "das intervall der automatischen optimierung beträgt {0} minuten",
+  "AutoOptimizationOnlyWhenIdle": "automatisch nur bei Inaktivität optimieren",
   "AutoUpdate": "automatische aktualisierung",
   "Background": "hintergrund",
   "Close": "schließen",

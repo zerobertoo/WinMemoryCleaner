@@ -4,6 +4,7 @@
   "AlwaysOnTop": "увек на врху",
   "AutoOptimization": "аутоматска оптимизација",
   "AutoOptimizationInterval": "интервал између аутоматске оптимизације слободне меморије је {0} минута",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "аутоматско ажурирање",
   "Background": "позадина",
   "Close": "затвори",

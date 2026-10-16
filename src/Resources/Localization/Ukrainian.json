@@ -4,6 +4,7 @@
   "AlwaysOnTop": "завжди зверху",
   "AutoOptimization": "автоматична оптимізація",
   "AutoOptimizationInterval": "інтервал між автоматичною оптимізацією вільної пам'яті становить {0} хвилин",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "автоматичне оновлення",
   "Background": "тло",
   "Close": "закрити",

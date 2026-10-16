@@ -4,6 +4,7 @@
   "AlwaysOnTop": "常に前面表示",
   "AutoOptimization": "自動最適化",
   "AutoOptimizationInterval": "フリーメモリ解放の間隔 {0} 分",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "自動更新",
   "Background": "背景",
   "Close": "閉じる",

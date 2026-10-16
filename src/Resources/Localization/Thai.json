@@ -4,6 +4,7 @@
   "AlwaysOnTop": "อยู่ด้านบนเสมอ",
   "AutoOptimization": "เพิ่มประสิทธิภาพอัตโนมัติ",
   "AutoOptimizationInterval": "ช่วงเวลาระหว่างการเพิ่มประสิทธิภาพหน่วยความจำอัตโนมัติคือ {0} นาที",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "อัปเดตอัตโนมัติ",
   "Background": "พื้นหลัง",
   "Close": "ปิด",

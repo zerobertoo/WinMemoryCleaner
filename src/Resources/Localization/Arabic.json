@@ -4,6 +4,7 @@
   "AlwaysOnTop": "دائما في الأعلى",
   "AutoOptimization": "التحسين التلقائي",
   "AutoOptimizationInterval": "الفاصل الزمني للتحسين التلقائي للذاكرة هو {0} دقيقة",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "التحديث التلقائي",
   "Background": "الخلفية",
   "Close": "إغلاق",

@@ -4,6 +4,7 @@
   "AlwaysOnTop": "همیشه در بالا",
   "AutoOptimization": "بهینه‌سازی خودکار",
   "AutoOptimizationInterval": "فاصله بین بهینه‌سازی خودکار حافظه آزاد {0} دقیقه است",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "به‌روزرسانی خودکار",
   "Background": "پس‌زمینه",
   "Close": "بستن",

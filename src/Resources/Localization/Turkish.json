@@ -4,6 +4,7 @@
   "AlwaysOnTop": "her zaman üstte",
   "AutoOptimization": "otomatik optimizasyon",
   "AutoOptimizationInterval": "boş belleğin otomatik olarak optimize edilmesi arasındaki aralık {0} dakikadır",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "otomatik güncelleme",
   "Background": "arka plan",
   "Close": "kapat",

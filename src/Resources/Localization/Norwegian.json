@@ -4,6 +4,7 @@
   "AlwaysOnTop": "alltid øverst",
   "AutoOptimization": "automatisk optimalisering",
   "AutoOptimizationInterval": "tiden mellom hver automatisk optimalisering av ledig minne er {0} minutter",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "automatisk oppdatering",
   "Background": "bakgrunn",
   "Close": "avslutt",

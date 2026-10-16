@@ -4,6 +4,7 @@
   "AlwaysOnTop": "sempre visível",
   "AutoOptimization": "otimização automática",
   "AutoOptimizationInterval": "o intervalo entre otimizações automáticas subsequentes de memória livre é de {0} minutos",
+  "AutoOptimizationOnlyWhenIdle": "otimizar automaticamente só quando ocioso",
   "AutoUpdate": "atualização automática",
   "Background": "plano de fundo",
   "Close": "fechar",

@@ -4,6 +4,7 @@
   "AlwaysOnTop": "窗口置顶",
   "AutoOptimization": "自动优化",
   "AutoOptimizationInterval": "每隔{0}分钟自动优化可用內存",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "自动更新",
   "Background": "背景",
   "Close": "关闭",

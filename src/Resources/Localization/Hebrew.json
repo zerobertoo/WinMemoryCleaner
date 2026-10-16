@@ -4,6 +4,7 @@
   "AlwaysOnTop": "תמיד עליון",
   "AutoOptimization": "אופטימיזציה אוטומטית",
   "AutoOptimizationInterval": "המרווח בין אופטימיזציה אוטומטית של זיכרון חופשי הוא {0} דקות",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "עדכון אוטומטי",
   "Background": "רקע",
   "Close": "סגור",

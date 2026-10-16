@@ -4,6 +4,7 @@
   "AlwaysOnTop": "altijd bovenaan",
   "AutoOptimization": "automatische optimalisatie",
   "AutoOptimizationInterval": "het interval tussen automatische optimalisatie van het vrije geheugen is {0} minuten",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "automatisch updaten",
   "Background": "achtergrond",
   "Close": "sluiten",

@@ -12,7 +12,7 @@ namespace WinMemoryCleaner
     {
         #region Fields
 
-        private string _about, _add, _alwaysOnTop, _autoOptimization, _autoOptimizationInterval, _autoUpdate;
+        private string _about, _add, _alwaysOnTop, _autoOptimization, _autoOptimizationInterval, _autoOptimizationOnlyWhenIdle, _autoUpdate;
         private string _background;
         private string _close, _closeAfterOptimization, _closeToTheNotificationArea, _collapse, _combinedPageList, _createStartMenuShortcut;
         private string _dangerLevel;
@@ -71,6 +71,13 @@ namespace WinMemoryCleaner
         {
             get { return _autoOptimizationInterval; }
             private set { _autoOptimizationInterval = value.Capitalize(); }
+        }
+
+        [DataMember]
+        public string AutoOptimizationOnlyWhenIdle
+        {
+            get { return _autoOptimizationOnlyWhenIdle; }
+            private set { _autoOptimizationOnlyWhenIdle = value.Capitalize(); }
         }
 
         [DataMember]

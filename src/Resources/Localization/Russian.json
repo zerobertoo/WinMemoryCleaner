@@ -4,6 +4,7 @@
   "AlwaysOnTop": "всегда сверху",
   "AutoOptimization": "автоматическая оптимизация",
   "AutoOptimizationInterval": "интервал между автоматической оптимизацией свободной памяти составляет {0} минут",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "автоматическое обновление",
   "Background": "фон",
   "Close": "закрыть",

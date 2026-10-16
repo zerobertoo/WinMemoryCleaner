@@ -4,6 +4,7 @@
   "AlwaysOnTop": "항상 맨 위에",
   "AutoOptimization": "자동 최적화",
   "AutoOptimizationInterval": "이후의 여유 메모리 자동 최적화 간격은 {0}분",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "자동 업데이트",
   "Background": "배경",
   "Close": "닫기",

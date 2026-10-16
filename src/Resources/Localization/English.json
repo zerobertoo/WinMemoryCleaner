@@ -4,6 +4,7 @@
   "AlwaysOnTop": "always on top",
   "AutoOptimization": "auto optimization",
   "AutoOptimizationInterval": "the interval between subsequent free memory auto optimizations is {0} minutes",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "auto update",
   "Background": "background",
   "Close": "close",

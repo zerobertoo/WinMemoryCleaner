@@ -4,6 +4,7 @@
   "AlwaysOnTop": "vedno na vrhu",
   "AutoOptimization": "samodejna optimizacija",
   "AutoOptimizationInterval": "interval med samodejno optimizacijo prostega pomnilnika je {0} minut",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "samodejna posodobitev",
   "Background": "ozadje",
   "Close": "zapri",

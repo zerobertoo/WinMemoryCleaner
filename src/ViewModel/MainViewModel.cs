@@ -292,6 +292,33 @@ namespace WinMemoryCleaner
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the automatic optimization waits for the user to be idle.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [only when idle]; otherwise, <c>false</c>.
+        /// </value>
+        public bool AutoOptimizationOnlyWhenIdle
+        {
+            get { return Settings.AutoOptimizationOnlyWhenIdle; }
+            set
+            {
+                try
+                {
+                    IsBusy = true;
+
+                    Settings.AutoOptimizationOnlyWhenIdle = value;
+                    Settings.Save();
+
+                    RaisePropertyChanged();
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether [close after optimization].
         /// </summary>
         /// <value>
@@ -937,7 +964,8 @@ namespace WinMemoryCleaner
                     new List<ObservableItem<bool>>
                     {
                        new ObservableItem<bool>(Localizer.String.AlwaysOnTop, () => AlwaysOnTop, value => AlwaysOnTop = value),
-                       new ObservableItem<bool>(Localizer.String.AutoUpdate, () => AutoUpdate, value => AutoUpdate = value, Helper.IsAutoUpdateSupported),
+                       new ObservableItem<bool>(Localizer.String.AutoOptimizationOnlyWhenIdle, () => AutoOptimizationOnlyWhenIdle, value => AutoOptimizationOnlyWhenIdle = value),
+                       new ObservableItem<bool>(Localizer.String.AutoUpdate,() => AutoUpdate, value => AutoUpdate = value, Helper.IsAutoUpdateSupported),
                        new ObservableItem<bool>(Localizer.String.CloseAfterOptimization, () => CloseAfterOptimization, value => CloseAfterOptimization = value),
                        new ObservableItem<bool>(Localizer.String.CloseToTheNotificationArea, () => CloseToTheNotificationArea, value => CloseToTheNotificationArea = value),
                        new ObservableItem<bool>(Localizer.String.CreateStartMenuShortcut, () => CreateStartMenuShortcut, value => CreateStartMenuShortcut = value),

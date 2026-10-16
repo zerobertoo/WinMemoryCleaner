@@ -4,6 +4,7 @@
   "AlwaysOnTop": "mindig legfelül",
   "AutoOptimization": "automatikus optimalizálás",
   "AutoOptimizationInterval": "a szabad memória automatikus optimalizálása közötti időköz {0} perc",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "automatikus frissítés",
   "Background": "háttér",
   "Close": "bezárás",

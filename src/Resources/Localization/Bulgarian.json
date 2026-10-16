@@ -4,6 +4,7 @@
   "AlwaysOnTop": "винаги на върха",
   "AutoOptimization": "автоматична оптимизация",
   "AutoOptimizationInterval": "интервалите между автоматичните оптимизации на паметта са {0} минути",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "автоматично обновяване",
   "Background": "фон",
   "Close": "затвори",

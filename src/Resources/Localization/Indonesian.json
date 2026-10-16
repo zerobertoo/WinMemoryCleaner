@@ -4,6 +4,7 @@
   "AlwaysOnTop": "selalu di atas",
   "AutoOptimization": "optimalisasi otomatis",
   "AutoOptimizationInterval": "jarak optimalisasi sisa ram secara otomatis adalah {0} menit",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "perbarui secara otomatis",
   "Background": "latar belakang",
   "Close": "tutup",

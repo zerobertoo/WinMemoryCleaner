@@ -4,6 +4,7 @@
   "AlwaysOnTop": "gjithmonë në krye",
   "AutoOptimization": "optimizimi automatik",
   "AutoOptimizationInterval": "intervali ndërmjet optimizimit automatik të memories së lirë është {0} minuta",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "përditësim automatik",
   "Background": "sfond",
   "Close": "mbylle",

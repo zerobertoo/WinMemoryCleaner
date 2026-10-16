@@ -4,6 +4,7 @@
   "AlwaysOnTop": "最上層顯示",
   "AutoOptimization": "自動最佳化",
   "AutoOptimizationInterval": "每隔{0}分鐘自動最佳化記憶體",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "自動更新",
   "Background": "背景",
   "Close": "關閉",

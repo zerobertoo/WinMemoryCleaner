@@ -4,6 +4,7 @@
   "AlwaysOnTop": "i gcónaí ar an mbarr",
   "AutoOptimization": "leas iomlán a bhaint uathoibríoch",
   "AutoOptimizationInterval": "is é {0} nóiméad an t-eatramh idir optamú cuimhne saor in aisce",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "nuashonrú uathoibríoch",
   "Background": "cúlra",
   "Close": "dún",

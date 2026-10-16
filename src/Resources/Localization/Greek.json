@@ -4,6 +4,7 @@
   "AlwaysOnTop": "πάντα στο προσκήνιο",
   "AutoOptimization": "αυτόματη βελτιστοποίηση",
   "AutoOptimizationInterval": "το διάστημα μεταξύ της αυτόματης βελτιστοποίησης ελεύθερης μνήμης είναι {0} λεπτά",
+  "AutoOptimizationOnlyWhenIdle": "auto optimize only when idle",
   "AutoUpdate": "αυτόματη ενημέρωση",
   "Background": "φόντο",
   "Close": "κλείσιμο",
