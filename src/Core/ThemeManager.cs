@@ -194,7 +194,7 @@ namespace WinMemoryCleaner
                 {
                     { "Accent", WpfColor.FromArgb(0xFF, 0xFF, 0x3B, 0x30) },
                     { "MemoryBarIndicatorBackground", WpfColor.FromArgb(0xFF, 0xF4, 0xF2, 0xEE) },
-                    { "MemoryBarTrackBackground", WpfColor.FromArgb(0xFF, 0x3A, 0x3A, 0x38) },
+                    { "MemoryBarTrackBackground", WpfColor.FromArgb(0xFF, 0x6E, 0x6E, 0x69) },
                     { "PrimaryBackground", WpfColor.FromArgb(0xFF, 0x14, 0x14, 0x14) },
                     { "PrimaryBorder", WpfColor.FromArgb(0xFF, 0x4A, 0x4A, 0x47) },
                     { "SecondaryBackground", WpfColor.FromArgb(0xFF, 0x1E, 0x1E, 0x1D) },

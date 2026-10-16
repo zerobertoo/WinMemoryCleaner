@@ -10,12 +10,12 @@ colors:
   night-ground: "#141414"
   night-card: "#1E1E1D"
   night-ink: "#F4F2EE"
-  night-track: "#3A3A38"
+  night-track: "#6E6E69"
   night-hairline: "#4A4A47"
   paper-ground: "#F4F2EE"
   paper-card: "#FBFAF8"
   paper-ink: "#111111"
-  paper-track: "#D2CFC8"
+  paper-track: "#8E8B84"
   mute-border: "#8A8A85"
 typography:
   readout:
@@ -90,9 +90,9 @@ Paleta de tinta e papel com um vermelho de sinal. As superfícies vêm do tema F
 ### Neutral
 - **Night Ground** (#141414) e **Night Card** (#1E1E1D): fundo e cartões do tema escuro.
 - **Night Ink** (#F4F2EE): texto e barras de "usado" no escuro.
-- **Night Track** (#3A3A38): trilho das barras de memória no escuro.
+- **Night Track** (#6E6E69): trilho das barras de memória no escuro.
 - **Paper Ground** (#F4F2EE), **Paper Card** (#FBFAF8) e **Paper Ink** (#111111): equivalentes do tema claro.
-- **Paper Track** (#D2CFC8): trilho das barras no claro.
+- **Paper Track** (#8E8B84): trilho das barras no claro.
 - **Mute Border** (#8A8A85): contornos de controles e rótulos secundários.
 
 ### Named Rules
