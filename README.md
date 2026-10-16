@@ -13,6 +13,29 @@ Otimiza as áreas de memória do Windows usando a API nativa (working set, stand
 - Testes migrados para NUnit 3 e executados com `dotnet test`.
 - Auto-update aponta para as releases deste repositório.
 
+## Linha de comando
+
+Os argumentos aceitam `/` ou `-` e não diferenciam maiúsculas de minúsculas.
+
+| Argumento | Efeito |
+|---|---|
+| `/WorkingSet`, `/SystemFileCache`, `/ModifiedPageList`, `/StandbyList`, `/StandbyListLowPriority`, `/CombinedPageList`, `/RegistryCache`, `/ModifiedFileCache` | Otimiza as áreas informadas em modo silencioso e encerra (podem ser combinadas) |
+| `/DryRun` | Junto com as áreas, só simula: informa por área se ela rodaria neste sistema (versão do Windows e privilégio), sem tocar na memória. Sem nenhuma área, a janela abre normalmente |
+| `/Install` / `/Uninstall` | Instala / remove o serviço do Windows |
+| `/Service` | Modo serviço (usado pelo `sc.exe`; não execute manualmente) |
+| `/Reset` | Restaura as configurações padrão |
+
+Só uma otimização roda por vez no computador (janela, serviço e linha de comando compartilham um mutex global); a que chegar durante outra é descartada.
+
+## Configurações extras
+
+As opções ficam em `HKLM\SOFTWARE\WinMemoryCleaner` e são editáveis na janela. Em particular:
+
+- `AutoOptimizationOnlyWhenIdle` (0/1, também nas configurações): a otimização automática da janela espera 5 minutos sem teclado/mouse. Não vale para o serviço.
+- Lista de exclusão: aceita o nome exato do processo ou padrões com `*` e `?` (ex.: `chrome*`).
+
+O histórico das últimas otimizações fica em `%ProgramData%\WinMemoryCleaner\history.jsonl` (500 entradas) e pode ser consultado no menu de ajuda, item **Histórico**.
+
 ## Build
 
 ```cmd

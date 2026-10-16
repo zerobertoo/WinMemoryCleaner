@@ -148,6 +148,10 @@ Cartões com cantos de 8px e contorno de 1px. Controles seguem os cantos do tema
 ### Inputs / Fields
 - **Style:** combobox, slider e checkbox Fluent; marcações e preenchimentos em vermelho de sinal.
 - **Focus:** borda do combobox em vermelho.
+- **Seletor de perfil (cartão Áreas de memória):** combobox no topo do cartão com Leve, Equilibrado, Agressivo e Personalizado. O perfil é deduzido das áreas marcadas, e escolher um marca as áreas correspondentes.
+
+### Menu de ajuda
+- **Histórico:** item do menu de ajuda, entre o link do repositório e Restaurar padrões, com ícone de relógio no mesmo traço dos demais. Abre um diálogo com as 10 últimas otimizações (data, motivo, memória liberada e áreas que falharam).
 
 ### Mostrador de memória (Signature)
 Anel de 72px com ponteiro vermelho cuja rotação é a porcentagem de memória física em uso (0–100% = uma volta). Vem acompanhado do valor em 44px e das barras de usado/livre.
