@@ -1867,11 +1867,11 @@ namespace WinMemoryCleaner
                     RaisePropertyChanged(() => Computer);
 
                     // Backoff: otimizações por pouca memória sem ganho espaçam as próximas tentativas
-                    if (reason == Enums.Memory.Optimization.Reason.LowMemory)
+                    if (reason == Enums.Memory.Optimization.Reason.LowMemory && optimizationResult.WasExecuted)
                         _memoryUsageCooldown.Record((ulong)Math.Max(0, Computer.Memory.Physical.Free.Bytes - tempPhysicalAvailable), (ulong)Math.Max(0, Computer.Memory.Physical.Total.Bytes));
 
                     // Notification
-                    if (Settings.ShowOptimizationNotifications)
+                    if (Settings.ShowOptimizationNotifications && optimizationResult.WasExecuted)
                     {
                         // Se a memória livre diminuiu (outro processo alocou), nada foi liberado: não exibe o módulo da diferença
                         var physicalReleased = (Computer.Memory.Physical.Free.Bytes > tempPhysicalAvailable ? Computer.Memory.Physical.Free.Bytes - tempPhysicalAvailable : 0).ToMemoryUnit();

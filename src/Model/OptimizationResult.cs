@@ -46,6 +46,11 @@ namespace WinMemoryCleaner
         public List<OptimizationAreaResult> Areas { get; } = new List<OptimizationAreaResult>();
 
         /// <summary>
+        /// Indica se ao menos uma área foi executada (falso quando a otimização foi descartada)
+        /// </summary>
+        public bool WasExecuted => Areas.Count > 0;
+
+        /// <summary>
         /// Áreas que falharam
         /// </summary>
         public IEnumerable<OptimizationAreaResult> Failed => Areas.Where(area => !area.Succeeded);

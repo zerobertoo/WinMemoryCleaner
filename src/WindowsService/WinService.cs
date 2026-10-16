@@ -152,7 +152,7 @@ namespace WinMemoryCleaner
 
             var freeBefore = _computer.Memory.Physical.Free.Bytes;
 
-            DependencyInjection.Container.Resolve<IComputerService>().Optimize(reason.Value, Settings.MemoryAreas);
+            var result = DependencyInjection.Container.Resolve<IComputerService>().Optimize(reason.Value, Settings.MemoryAreas);
 
             if (reason == Enums.Memory.Optimization.Reason.Schedule)
             {
@@ -162,10 +162,13 @@ namespace WinMemoryCleaner
             {
                 _lastAutoOptimizationByMemoryUsage = DateTimeOffset.Now;
 
-                // Backoff: otimização por pouca memória sem ganho espaça as próximas tentativas
-                var after = _computerService.Memory.Physical;
+                // Backoff: otimização por pouca memória sem ganho espaça as próximas tentativas (descartada não conta)
+                if (result.WasExecuted)
+                {
+                    var after = _computerService.Memory.Physical;
 
-                _memoryUsageCooldown.Record((ulong)Math.Max(0, after.Free.Bytes - freeBefore), (ulong)Math.Max(0, after.Total.Bytes));
+                    _memoryUsageCooldown.Record((ulong)Math.Max(0, after.Free.Bytes - freeBefore), (ulong)Math.Max(0, after.Total.Bytes));
+                }
             }
         }
     }

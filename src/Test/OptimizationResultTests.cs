@@ -28,6 +28,7 @@ namespace WinMemoryCleaner.Test
             Assert.IsEmpty(result.Areas);
             Assert.IsFalse(result.HasFailures);
             Assert.IsFalse(result.IsPartial);
+            Assert.IsFalse(result.WasExecuted);
         }
 
         [Test]
