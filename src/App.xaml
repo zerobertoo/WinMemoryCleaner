@@ -4,6 +4,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <!-- WPF-UI: tema (Fluent) e estilos dos controles -->
+                <!-- Dark é só o valor inicial; o ThemeManager aplica o tema salvo logo na inicialização -->
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
             </ResourceDictionary.MergedDictionaries>
@@ -22,7 +23,7 @@
             <!-- Colors (substituídas em tempo de execução pelo ThemeManager) -->
             <SolidColorBrush x:Key="Accent" Color="#E30613" />
             <SolidColorBrush x:Key="MemoryBarIndicatorBackground" Color="#F4F2EE" />
-            <SolidColorBrush x:Key="MemoryBarTrackBackground" Color="#3A3A38" />
+            <SolidColorBrush x:Key="MemoryBarTrackBackground" Color="#6E6E69" />
             <SolidColorBrush x:Key="PrimaryBackground" Color="#141414" />
             <SolidColorBrush x:Key="PrimaryBorder" Color="#4A4A47" />
             <SolidColorBrush x:Key="SecondaryBackground" Color="#1E1E1D" />
@@ -33,6 +34,26 @@
             <FontFamily x:Key="FontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
             <System:Double x:Key="FontSize">14</System:Double>
             <FontWeight x:Key="FontWeight">Normal</FontWeight>
+            <!-- Barra de memória reutilizada nas leituras de memória física e virtual -->
+            <ControlTemplate x:Key="MemoryBarTemplate" TargetType="{x:Type ProgressBar}">
+                <Grid VerticalAlignment="Stretch">
+                    <Border Background="{DynamicResource MemoryBarTrackBackground}" Name="PART_Track" VerticalAlignment="Stretch" />
+                    <Border Background="{DynamicResource MemoryBarIndicatorBackground}" HorizontalAlignment="Left" Name="PART_Indicator" VerticalAlignment="Stretch" />
+                </Grid>
+            </ControlTemplate>
+            <!-- Item de cor (quadrado + hexadecimal) dos seletores de cor do ícone da bandeja -->
+            <DataTemplate x:Key="ColorSwatchItemTemplate">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Rectangle Fill="{Binding}" Height="16" RadiusX="3" RadiusY="3" VerticalAlignment="Center" Width="16" />
+                    <TextBlock Margin="4, 0, 0, 0" Text="{Binding Converter={StaticResource BrushToHexConverter}}" VerticalAlignment="Center" />
+                </StackPanel>
+            </DataTemplate>
+            <!-- Estado de erro: vermelho de sinal, nunca a cor de desabilitado -->
+            <Style x:Key="InlineErrorTextStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="AutomationProperties.LiveSetting" Value="Polite" />
+            </Style>
             <!-- As janelas herdam de View (FluentWindow); sem este estilo o tema Fluent não é aplicado -->
             <Style TargetType="{x:Type local:View}" BasedOn="{StaticResource {x:Type ui:FluentWindow}}" />
             <!-- Seção em cartão: fundo e contorno do tema Fluent, cabeçalho em destaque -->
